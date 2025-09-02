@@ -93,7 +93,6 @@ const LoveUsRateUs = ({ navigation, route }) => {
   const [feedback, setFeedback] = useState('');
   const [uploadedImages, setUploadedImages] = useState([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const previousScreen = route?.params?.previousScreen || 'Profile';
   
   const slideAnim = useRef(new Animated.Value(300)).current;
 
@@ -115,7 +114,7 @@ const LoveUsRateUs = ({ navigation, route }) => {
       useNativeDriver: true,
     }).start(() => {
       if (navigation && navigation.navigate) {
-        navigation.navigate(previousScreen);
+        navigation.navigate('Profile');
       } else if (navigation && navigation.goBack) {
         navigation.goBack();
       }
@@ -161,8 +160,8 @@ const LoveUsRateUs = ({ navigation, route }) => {
 
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false);
-    // Navigate back to ProfileScreen
-    navigation.navigate('ProfileScreen');
+    // Navigate back to Profile
+    navigation.navigate('Profile');
   };
 
   const removeImage = (indexToRemove) => {
@@ -184,14 +183,14 @@ const LoveUsRateUs = ({ navigation, route }) => {
           <TouchableOpacity style={styles.backButton} onPress={handleBack}>
             <BackArrowIcon />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Submit your feedback</Text>
+          <Text style={styles.headerTitle}>Submit your Feedback</Text>
           <View style={styles.headerSpacer} />
         </View>
 
         <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
           {/* Rating Section */}
           <View style={styles.ratingSection}>
-            <Text style={styles.ratingTitle}>How would you rate your experience?</Text>
+            <Text style={styles.ratingTitle}>How was your experience ?</Text>
             <StarRating rating={rating} onRatingPress={setRating} />
             {rating > 0 && (
               <Text style={styles.ratingText}>
@@ -206,23 +205,21 @@ const LoveUsRateUs = ({ navigation, route }) => {
 
           {/* Feedback Input Section */}
           <View style={styles.feedbackSection}>
-            <Text style={styles.feedbackTitle}>Tell us more about your experience</Text>
             <TextInput
               style={styles.feedbackInput}
               multiline={true}
               numberOfLines={6}
-              placeholder="Share your thoughts, suggestions, or any issues you encountered..."
+              placeholder="We Would love to hear your feedback. what was positive .what would you like us to improve?"
               value={feedback}
               onChangeText={setFeedback}
-              placeholderTextColor="#999999"
+              placeholderTextColor="#5A5A5A"
               textAlignVertical="top"
             />
+            <Text style={styles.characterCount}>50 characters</Text>
           </View>
 
           {/* Photo Upload Section */}
           <View style={styles.photoSection}>
-            <Text style={styles.photoTitle}>Add photos (optional)</Text>
-            
             {/* Uploaded Images Stack */}
             <View style={styles.imageStackContainer}>
               {uploadedImages.length > 0 ? (
@@ -254,23 +251,25 @@ const LoveUsRateUs = ({ navigation, route }) => {
                 </View>
               ) : null}
               
-              {/* Camera Button */}
-              <TouchableOpacity 
-                style={[
-                  styles.cameraButton,
-                  uploadedImages.length > 0 && styles.cameraButtonWithImages
-                ]} 
-                onPress={handleImagePicker}
-              >
-                <CameraIcon />
-                <Text style={styles.cameraButtonText}>Add Photo</Text>
-              </TouchableOpacity>
+              {/* Photo Upload Buttons */}
+              <View style={styles.uploadButtonsContainer}>
+                <TouchableOpacity style={styles.photoButton} onPress={handleImagePicker}>
+                  <View style={styles.photoIcon}>
+                    <View style={styles.photoIconRect} />
+                    <View style={styles.photoIconCircle} />
+                  </View>
+                </TouchableOpacity>
+                
+                <TouchableOpacity style={styles.cameraButton} onPress={handleImagePicker}>
+                  <CameraIcon />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
 
           {/* Submit Button */}
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmitFeedback}>
-            <Text style={styles.submitButtonText}>Submit Feedback</Text>
+            <Text style={styles.submitButtonText}>Send feedback</Text>
           </TouchableOpacity>
         </ScrollView>
       </Animated.View>
@@ -287,7 +286,7 @@ const LoveUsRateUs = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F5F5F5',
   },
   content: {
     flex: 1,
@@ -299,17 +298,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 20,
+    paddingTop: 54,
+    paddingBottom: 12,
+    backgroundColor: '#FFFFFF',
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#000000',
+    textAlign: 'center',
+    letterSpacing: -0.4,
   },
   backButton: {
     padding: 8,
     marginLeft: -8,
-  },
-  headerTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#000000',
   },
   headerSpacer: {
     width: 40,
@@ -327,15 +329,16 @@ const styles = StyleSheet.create({
   // Rating Section
   ratingSection: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 40,
     paddingVertical: 20,
   },
   ratingTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000000',
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#121420',
     marginBottom: 20,
     textAlign: 'center',
+    letterSpacing: -0.07,
   },
   starContainer: {
     flexDirection: 'row',
@@ -349,7 +352,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
   },
   starFilled: {
-    color: '#FFD700',
+    color: '#FBBC05',
   },
   starEmpty: {
     color: '#E0E0E0',
@@ -364,38 +367,74 @@ const styles = StyleSheet.create({
   feedbackSection: {
     marginBottom: 32,
   },
-  feedbackTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 12,
-  },
   feedbackInput: {
     borderWidth: 2,
     borderColor: '#E0E0E0',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: '#000000',
+    borderRadius: 20,
+    padding: 20,
+    fontSize: 12,
+    color: '#5A5A5A',
     backgroundColor: '#FFFFFF',
-    minHeight: 120,
+    minHeight: 240,
+    lineHeight: 16,
+  },
+  characterCount: {
+    fontSize: 12,
+    color: '#5A5A5A',
+    textAlign: 'right',
+    marginTop: 8,
+    marginRight: 4,
   },
 
   // Photo Section
   photoSection: {
     marginBottom: 40,
   },
-  photoTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 16,
-  },
   imageStackContainer: {
     minHeight: 100,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
+  },
+  uploadButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  photoButton: {
+    width: 69,
+    height: 64,
+    borderWidth: 2,
+    borderColor: '#CCD2E3',
+    borderStyle: 'dashed',
+    borderRadius: 15,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  photoIcon: {
+    width: 35,
+    height: 35,
+    position: 'relative',
+  },
+  photoIconRect: {
+    position: 'absolute',
+    top: 6,
+    left: 0,
+    width: 27,
+    height: 21,
+    borderWidth: 2,
+    borderColor: '#CCD2E3',
+    borderRadius: 4,
+  },
+  photoIconCircle: {
+    position: 'absolute',
+    top: 0,
+    right: 6,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#CCD2E3',
   },
   imageStack: {
     position: 'relative',
@@ -439,15 +478,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   cameraButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
+    width: 69,
+    height: 64,
     borderWidth: 2,
-    borderColor: '#E0E0E0',
+    borderColor: '#CCD2E3',
     borderStyle: 'dashed',
-    borderRadius: 12,
-    backgroundColor: '#F8F8F8',
-    minWidth: 120,
+    borderRadius: 15,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   cameraButtonWithImages: {
     position: 'absolute',
@@ -460,36 +499,40 @@ const styles = StyleSheet.create({
     borderColor: '#000000',
   },
   cameraIconContainer: {
-    width: 32,
-    height: 24,
-    marginBottom: 8,
+    width: 33,
+    height: 33,
     position: 'relative',
   },
   cameraBody: {
+    position: 'absolute',
+    top: 7,
+    left: 0,
     width: 28,
     height: 20,
-    backgroundColor: '#666666',
+    borderWidth: 2,
+    borderColor: '#CCD2E3',
     borderRadius: 4,
-    position: 'absolute',
-    top: 4,
+    backgroundColor: 'transparent',
   },
   cameraLens: {
-    width: 12,
-    height: 12,
-    backgroundColor: '#333333',
-    borderRadius: 6,
     position: 'absolute',
-    top: 8,
+    top: 11,
     left: 8,
+    width: 11,
+    height: 11,
+    borderWidth: 2,
+    borderColor: '#CCD2E3',
+    borderRadius: 5.5,
+    backgroundColor: 'transparent',
   },
   cameraFlash: {
-    width: 4,
-    height: 4,
-    backgroundColor: '#999999',
-    borderRadius: 2,
     position: 'absolute',
     top: 0,
-    left: 4,
+    right: 6,
+    width: 8,
+    height: 8,
+    backgroundColor: '#CCD2E3',
+    borderRadius: 4,
   },
   cameraButtonText: {
     fontSize: 14,
