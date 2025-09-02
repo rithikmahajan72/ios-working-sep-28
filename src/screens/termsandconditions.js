@@ -51,9 +51,15 @@ const TermsAndConditions = ({ navigation, route }) => {
     if (isAccepted) {
       // Handle acceptance and proceed to preference selector
       
+      // Get the previousScreen from route params to pass along
+      const previousScreen = route?.params?.previousScreen;
+      
       // Navigate to Preference Selector modal after accepting terms
+      // Pass the previousScreen parameter so PreferenceSelector can skip back to the original screen
       if (navigation) {
-        navigation.navigate('PreferenceSelector');
+        navigation.navigate('PreferenceSelector', { 
+          previousScreen: previousScreen 
+        });
       }
     }
   };

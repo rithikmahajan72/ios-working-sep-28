@@ -14,6 +14,7 @@ import {
   Text,
   SafeAreaView,
 } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { EnhancedLayout } from './src/components/layout';
 import SplashScreen from './src/components/SplashScreen';
 import { Colors } from './src/constants';
@@ -52,18 +53,20 @@ function App() {
 
   try {
     return (
-      <ErrorBoundary>
-        <FavoritesProvider>
-          <View style={styles.container}>
-            <StatusBar
-              barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-              backgroundColor={Colors.background}
-              translucent={false}
-            />
-            <EnhancedLayout />
-          </View>
-        </FavoritesProvider>
-      </ErrorBoundary>
+      <GestureHandlerRootView style={styles.container}>
+        <ErrorBoundary>
+          <FavoritesProvider>
+            <View style={styles.container}>
+              <StatusBar
+                barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+                backgroundColor={Colors.background}
+                translucent={false}
+              />
+              <EnhancedLayout />
+            </View>
+          </FavoritesProvider>
+        </ErrorBoundary>
+      </GestureHandlerRootView>
     );
   } catch (error) {
     console.error('Critical error in App component:', error);

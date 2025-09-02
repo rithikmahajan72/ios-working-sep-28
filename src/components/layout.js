@@ -231,6 +231,7 @@ const EnhancedLayout = () => {
 
   const handleClosePreferenceModal = () => {
     setShowPreferenceModal(false);
+    // Don't navigate here - let the PreferenceSelector handle its own navigation
   };
 
   return (
@@ -264,6 +265,7 @@ const EnhancedLayout = () => {
         visible={showPreferenceModal}
         navigation={navigation}
         onClose={handleClosePreferenceModal}
+        route={{ params: routeParams }}
       />
     </View>
   );

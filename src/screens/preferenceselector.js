@@ -4,23 +4,66 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   Dimensions,
   Animated,
   Modal,
   Easing,
   PanResponder,
 } from 'react-native';
+import {
+  createGestureTracker,
+} from './advancegesturesetuptoapplytoallmodals';
 
 const { width: screenWidth } = Dimensions.get('window');
 
-const PreferenceSelector = ({ navigation, visible = true, onClose }) => {
+const PreferenceSelector = ({ navigation, visible = true, onClose, route }) => {
   const [selectedPreference, setSelectedPreference] = useState('female'); // Default to female as shown in Figma
+  const [isDragging, setIsDragging] = useState(false); // Add drag state tracking
+  
+  // Enhanced animation values
   const slideAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const panY = useRef(new Animated.Value(0)).current;
+  const backdropOpacity = useRef(new Animated.Value(1)).current; // Add backdrop opacity control
+  
+  // Advanced gesture state tracking
+  const gestureTracker = createGestureTracker();
 
-  // Animation effect when modal becomes visible
+  // Advanced dismiss handler using the utility
+  const handleDismiss = useCallback(() => {
+    // First close the modal with animation, then navigate
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 250,
+        easing: Easing.in(Easing.ease),
+        useNativeDriver: false,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 0,
+        duration: 250,
+        easing: Easing.in(Easing.ease),
+        useNativeDriver: false,
+      }),
+      Animated.timing(backdropOpacity, {
+        toValue: 0,
+        duration: 250,
+        easing: Easing.in(Easing.ease),
+        useNativeDriver: false,
+      }),
+    ]).start(() => {
+      // Close the modal first
+      if (onClose) {
+        onClose();
+      }
+      // Then navigate to LoginAccountMobileNumber
+      if (navigation) {
+        navigation.navigate('LoginAccountMobileNumber');
+      }
+    });
+  }, [slideAnim, opacityAnim, backdropOpacity, onClose, navigation]);
+
+  // Animation effect when modal becomes visible - enhanced for backdrop
   useEffect(() => {
     if (visible) {
       // Start entrance animation (down to up)
@@ -37,13 +80,20 @@ const PreferenceSelector = ({ navigation, visible = true, onClose }) => {
           easing: Easing.out(Easing.ease),
           useNativeDriver: false,
         }),
+        Animated.timing(backdropOpacity, {
+          toValue: 1,
+          duration: 250,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: false,
+        }),
       ]).start();
     } else {
       // Reset animation values when not visible
       slideAnim.setValue(0);
       opacityAnim.setValue(0);
+      backdropOpacity.setValue(0);
     }
-  }, [visible, slideAnim, opacityAnim]);
+  }, [visible, slideAnim, opacityAnim, backdropOpacity]);
 
   // Memoize static preferences data
   const preferences = useMemo(() => [
@@ -75,9 +125,9 @@ const PreferenceSelector = ({ navigation, visible = true, onClose }) => {
         useNativeDriver: false,
       }),
     ]).start(() => {
-      // Navigate to Home screen after animation completes
+      // Navigate specifically to LoginAccountMobileNumber screen
       if (navigation) {
-        navigation.navigate('Home');
+        navigation.navigate('LoginAccountMobileNumber');
       }
       if (onClose) {
         onClose();
@@ -85,102 +135,150 @@ const PreferenceSelector = ({ navigation, visible = true, onClose }) => {
     });
   }, [navigation, onClose, slideAnim, opacityAnim]);
 
-  // PanResponder for swipe to dismiss
+  // Enhanced PanResponder with proper closing functionality
   const panResponder = useRef(
     PanResponder.create({
+      // Allow gesture to start on any touch
+      onStartShouldSetPanResponder: (evt, gestureState) => {
+        console.log('Start gesture check:', gestureState);
+        return true; // Always try to capture gestures
+      },
+      
+      // Much more responsive gesture detection
       onMoveShouldSetPanResponder: (evt, gestureState) => {
-        // Only respond to vertical gestures that are moving downward
-        return Math.abs(gestureState.dy) > Math.abs(gestureState.dx) && gestureState.dy > 10;
-      },
-      onPanResponderGrant: () => {
-        // Gesture started
-        panY.setOffset(panY._value);
-      },
-      onPanResponderMove: (evt, gestureState) => {
-        // Only allow downward movement
-        if (gestureState.dy > 0) {
-          panY.setValue(gestureState.dy);
-        }
-      },
-      onPanResponderRelease: (evt, gestureState) => {
-        panY.flattenOffset();
+        const { dx, dy } = gestureState;
+        const isVerticalGesture = Math.abs(dy) > Math.abs(dx);
+        const isDownwardGesture = dy > 2; // Very low threshold for immediate response
+        const hasSufficientMovement = Math.abs(dy) > 1; // Any movement counts
         
-        const shouldDismiss = gestureState.dy > 100 || gestureState.vy > 0.5;
+        console.log('Move gesture check:', { 
+          dy, 
+          dx, 
+          isVertical: isVerticalGesture, 
+          isDownward: isDownwardGesture,
+          sufficient: hasSufficientMovement,
+          result: isVerticalGesture && isDownwardGesture && hasSufficientMovement
+        });
+        
+        return isVerticalGesture && isDownwardGesture && hasSufficientMovement;
+      },
+      
+      // Capture handlers to ensure gesture priority
+      onStartShouldSetPanResponderCapture: (evt, gestureState) => {
+        console.log('Start capture check');
+        return false; // Let other components handle if needed
+      },
+      
+      onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
+        const { dx, dy } = gestureState;
+        const isVerticalGesture = Math.abs(dy) > Math.abs(dx);
+        const isDownwardGesture = dy > 2;
+        console.log('Move capture check:', { dy, dx, shouldCapture: isVerticalGesture && isDownwardGesture });
+        return isVerticalGesture && isDownwardGesture; // Capture vertical downward gestures
+      },
+      
+      // Gesture started
+      onPanResponderGrant: (evt, gestureState) => {
+        console.log('Gesture started!');
+        setIsDragging(true);
+        gestureTracker.isActive = true;
+        gestureTracker.startY = gestureState.y0;
+        gestureTracker.lastTimestamp = Date.now();
+        
+        panY.setOffset(panY._value);
+        panY.setValue(0);
+        
+        // Visual feedback
+        Animated.timing(backdropOpacity, {
+          toValue: 0.8,
+          duration: 150,
+          useNativeDriver: false,
+        }).start();
+      },
+      
+      // Follow finger movement
+      onPanResponderMove: (evt, gestureState) => {
+        const { dy } = gestureState;
+        console.log('Moving:', dy);
+        
+        // Enhanced movement with elastic resistance
+        if (dy > 0) {
+          panY.setValue(dy);
+        } else if (dy < 0) {
+          const resistance = Math.max(0.1, 1 - Math.abs(dy) / 100);
+          panY.setValue(dy * resistance);
+        }
+        
+        // Dynamic backdrop opacity
+        const dragProgress = Math.min(1, Math.abs(dy) / 150);
+        const newOpacity = Math.max(0.4, 1 - (dragProgress * 0.4));
+        backdropOpacity.setValue(newOpacity);
+      },
+      
+      // Handle release
+      onPanResponderRelease: (evt, gestureState) => {
+        console.log('Gesture released:', gestureState.dy, gestureState.vy);
+        panY.flattenOffset();
+        setIsDragging(false);
+        gestureTracker.isActive = false;
+        
+        const { dy, vy } = gestureState;
+        
+        // Clear dismissal logic - dismiss if dragged far or fast swipe
+        const shouldDismiss = dy > 100 || (Math.abs(vy) > 0.8 && vy > 0);
         
         if (shouldDismiss) {
-          // Dismiss modal with animation
-          Animated.parallel([
-            Animated.timing(panY, {
-              toValue: 300,
-              duration: 200,
-              easing: Easing.out(Easing.ease),
-              useNativeDriver: false,
-            }),
-            Animated.timing(opacityAnim, {
-              toValue: 0,
-              duration: 200,
-              easing: Easing.out(Easing.ease),
-              useNativeDriver: false,
-            }),
-          ]).start(() => {
-            // Reset animations and close modal
-            panY.setValue(0);
-            slideAnim.setValue(0);
-            opacityAnim.setValue(0);
-            
-            if (onClose) {
-              onClose();
-            }
-            
-            // Navigate back to previous screen
-            if (navigation && navigation.goBack) {
-              navigation.goBack();
-            }
-          });
+          console.log('Dismissing modal');
+          handleDismiss();
         } else {
-          // Snap back to original position
+          console.log('Returning to position');
+          // Snap back
+          Animated.parallel([
+            Animated.spring(panY, {
+              toValue: 0,
+              tension: 300,
+              friction: 30,
+              useNativeDriver: false,
+            }),
+            Animated.timing(backdropOpacity, {
+              toValue: 1,
+              duration: 200,
+              useNativeDriver: false,
+            }),
+          ]).start();
+        }
+      },
+      
+      // Allow termination for better responsiveness
+      onPanResponderTerminationRequest: () => true,
+      
+      // Handle termination gracefully
+      onPanResponderTerminate: () => {
+        setIsDragging(false);
+        gestureTracker.isActive = false;
+        
+        // Snap back to original position
+        Animated.parallel([
           Animated.spring(panY, {
             toValue: 0,
+            tension: 300,
+            friction: 30,
             useNativeDriver: false,
-            tension: 100,
-            friction: 8,
-          }).start();
-        }
+          }),
+          Animated.timing(backdropOpacity, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: false,
+          }),
+        ]).start();
       },
     })
   ).current;
 
   const handleBackdropPress = useCallback(() => {
-    // Dismiss modal when backdrop is pressed
-    Animated.parallel([
-      Animated.timing(panY, {
-        toValue: 300,
-        duration: 250,
-        easing: Easing.out(Easing.ease),
-        useNativeDriver: false,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: 0,
-        duration: 250,
-        easing: Easing.out(Easing.ease),
-        useNativeDriver: false,
-      }),
-    ]).start(() => {
-      // Reset animations and close modal
-      panY.setValue(0);
-      slideAnim.setValue(0);
-      opacityAnim.setValue(0);
-      
-      if (onClose) {
-        onClose();
-      }
-      
-      // Navigate back to previous screen
-      if (navigation && navigation.goBack) {
-        navigation.goBack();
-      }
-    });
-  }, [panY, opacityAnim, slideAnim, onClose, navigation]);
+    // Dismiss modal when backdrop is pressed using advanced dismiss
+    handleDismiss();
+  }, [handleDismiss]);
 
   // Animation interpolations
   const translateY = Animated.add(
@@ -196,25 +294,39 @@ const PreferenceSelector = ({ navigation, visible = true, onClose }) => {
     opacity: opacityAnim,
   };
 
+  const animatedBackdropStyle = {
+    ...styles.modalOverlay,
+    backgroundColor: backdropOpacity.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.5)'],
+    }),
+  };
+
   return (
     <Modal
       visible={visible}
       transparent={true}
       animationType="none" // We handle animation manually
-      onRequestClose={onClose}
+      onRequestClose={handleDismiss} // Handle hardware back button
     >
-      <TouchableOpacity 
-        style={styles.modalOverlay} 
-        activeOpacity={1} 
-        onPress={handleBackdropPress}
-      >
-        <TouchableWithoutFeedback>
-          <Animated.View 
-            style={[styles.modalContainer, animatedModalStyle]}
-            {...panResponder.panHandlers}
-          >
-            {/* Swipe Handle Indicator */}
-            <View style={styles.swipeHandle} />
+      <Animated.View style={animatedBackdropStyle} pointerEvents="box-none">
+        {/* Backdrop touch area - closes modal when pressed */}
+        <TouchableOpacity 
+          style={StyleSheet.absoluteFill} 
+          activeOpacity={1} 
+          onPress={handleBackdropPress}
+        />
+        
+        {/* Modal content with gesture handling - remove TouchableWithoutFeedback */}
+        <Animated.View 
+          style={[styles.modalContainer, animatedModalStyle]}
+          {...panResponder.panHandlers}
+        >
+            {/* Enhanced Swipe Handle Indicator - shows drag state */}
+            <View style={[
+              styles.swipeHandle, 
+              isDragging && styles.swipeHandleActive
+            ]} />
             
             {/* Header Icon */}
             <View style={styles.headerIconContainer}>
@@ -272,11 +384,10 @@ const PreferenceSelector = ({ navigation, visible = true, onClose }) => {
             Let's YORAA
           </Text>
         </TouchableOpacity>
-          </Animated.View>
-        </TouchableWithoutFeedback>
-      </TouchableOpacity>
-    </Modal>
-  );
+        </Animated.View>
+    </Animated.View>
+  </Modal>
+);
 };
 
 const styles = StyleSheet.create({
@@ -314,6 +425,19 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 20,
     alignSelf: 'center',
+  },
+  swipeHandleActive: {
+    backgroundColor: '#2196F3',
+    width: 60,
+    height: 5,
+    shadowColor: '#2196F3',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
   },
   headerIconContainer: {
     marginBottom: 32,
