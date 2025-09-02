@@ -12,6 +12,7 @@ import HeartFilledIcon from '../assets/icons/HeartFilledIcon';
 import GlobalBackButton from '../components/GlobalBackButton';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useOptimizedList } from '../hooks/usePerformanceOptimization';
+import { getProductsByIds } from '../constants/products';
 
 const FavouritesContent = ({ navigation }) => {
   const { favorites, getFavoritesCount } = useFavorites();
@@ -23,32 +24,10 @@ const FavouritesContent = ({ navigation }) => {
     }
   }, [getFavoritesCount, navigation]);
 
-    // Memoized product data - in a real app, this would come from API/context
-  const allProducts = useMemo(() => [
-    {
-      id: '1',
-      name: 'Air Jordan 1 Mid',
-      price: 'US$125',
-      image: 'https://example.com/image1.jpg',
-    },
-    {
-      id: '2', 
-      name: 'Nike Dunk Low',
-      price: 'US$110',
-      image: 'https://example.com/image2.jpg',
-    },
-    {
-      id: '3',
-      name: 'Adidas Stan Smith',
-      price: 'US$80',
-      image: 'https://example.com/image3.jpg',
-    },
-  ], []);
-
-  // Memoized filtered products to prevent unnecessary recalculations
+  // Get favorited products using the centralized product data
   const favouritedProducts = useMemo(() => 
-    allProducts.filter(product => favorites.has(product.id)),
-    [allProducts, favorites]
+    getProductsByIds(Array.from(favorites)),
+    [favorites]
   );
 
   // Optimized list props using performance hook

@@ -22,9 +22,9 @@ const USER_POINTS = {
 
 const LEVELS = [
   { name: 'bronze', points: 100, color: '#CD7F32' },
-  { name: 'silver', points: 200, color: '#C0C0C0' },
-  { name: 'gold', points: 300, color: '#FFD700' },
-  { name: 'platinum', points: 400, color: '#DA70D6' },
+  { name: 'silver', points: 200, color: '#D9D9D9' },
+  { name: 'gold', points: 300, color: '#D4AF37' },
+  { name: 'platinum', points: 400, color: '#B075A5' },
   { name: 'black', points: 500, color: '#000000' },
 ];
 
@@ -80,7 +80,11 @@ const RewardsScreen = ({ navigation, route }) => {
   );
 
   const renderRewardsTab = () => (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView 
+      style={styles.container} 
+      contentContainerStyle={styles.scrollContentContainer}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Black promotional section */}
       <View style={styles.promoSection}>
         <Text style={styles.promoWant}>WANT</Text>
@@ -96,23 +100,20 @@ const RewardsScreen = ({ navigation, route }) => {
       <View style={styles.progressSection}>
         <View style={styles.levelIndicator}>
           {LEVELS.map((level, index) => (
-            <React.Fragment key={level.name}>
-              <View style={styles.levelPoint}>
-                <View style={[
-                  styles.levelDot,
-                  { backgroundColor: level.color },
-                  USER_POINTS.current >= level.points && styles.levelDotActive
+            <View key={level.name} style={styles.levelPoint}>
+              <View style={[
+                styles.levelDot,
+                { backgroundColor: level.color },
+                USER_POINTS.current >= level.points && styles.levelDotActive
+              ]}>
+                <Text style={[
+                  styles.levelPoints,
+                  { color: level.name === 'silver' || level.name === 'gold' || level.name === 'platinum' ? '#000000' : '#FFFFFF' }
                 ]}>
-                  <Text style={[
-                    styles.levelPoints,
-                    { color: level.name === 'silver' || level.name === 'gold' || level.name === 'platinum' ? '#000000' : '#FFFFFF' }
-                  ]}>
-                    {level.points}
-                  </Text>
-                </View>
+                  {level.points}
+                </Text>
               </View>
-              {index < LEVELS.length - 1 && <View style={styles.levelLine} />}
-            </React.Fragment>
+            </View>
           ))}
         </View>
         
@@ -140,6 +141,7 @@ const RewardsScreen = ({ navigation, route }) => {
     <ScrollView 
       style={styles.container} 
       showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.scrollContentContainer}
       onScroll={Animated.event(
         [{ nativeEvent: { contentOffset: { y: scrollY } } }],
         { useNativeDriver: false }
@@ -156,9 +158,6 @@ const RewardsScreen = ({ navigation, route }) => {
           })
         }]
       }]}>
-        <Text style={styles.expiresText}>Expires in 8 days</Text>
-        <Text style={styles.giveawayTitle}>YORAA Concert Giveaways</Text>
-        
         <TouchableOpacity 
           style={styles.membersExclusiveButton}
           onPress={() => navigation.navigate('MembersExclusive', { previousScreen: 'Rewards' })}
@@ -169,9 +168,6 @@ const RewardsScreen = ({ navigation, route }) => {
 
       {/* Static content below */}
       <View style={styles.staticContent}>
-        <Text style={styles.expiresTextStatic}>Expires in 8 days</Text>
-        <Text style={styles.giveawayTitleStatic}>YORAA Concert Giveaways</Text>
-
         {/* Sign in and Create Account buttons */}
         <View style={styles.authButtons}>
           <TouchableOpacity 
@@ -263,7 +259,13 @@ const RewardsScreen = ({ navigation, route }) => {
                 }
               }}
             >
-              <Text style={styles.checkboxLabel}>{pref}</Text>
+              <Text style={
+                pref === 'Women' && !selectedAdditionalPreferences.includes(pref) 
+                  ? styles.checkboxLabelGrayed 
+                  : styles.checkboxLabel
+              }>
+                {pref}
+              </Text>
               <View style={styles.checkbox}>
                 {selectedAdditionalPreferences.includes(pref) && (
                   <Text style={styles.checkmark}>✓</Text>
@@ -293,18 +295,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
+  scrollContentContainer: {
+    paddingBottom: 100, // Add extra padding for bottom navigation
+  },
   
   // Tab Styles
   tabContainer: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: '#CDCDCD',
     backgroundColor: '#FFFFFF',
+    height: 46,
   },
   tabButton: {
-    flex: 1,
-    paddingVertical: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   activeTab: {
     borderBottomWidth: 2,
@@ -312,12 +319,15 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 16,
-    fontWeight: '400',
-    color: '#666666',
+    fontWeight: '500',
+    color: '#767676',
+    fontFamily: 'Montserrat-Medium',
+    letterSpacing: -0.4,
   },
   activeTabText: {
     color: '#000000',
-    fontWeight: '600',
+    fontWeight: '500',
+    fontFamily: 'Montserrat-Medium',
   },
 
   // Rewards Tab Styles
@@ -325,47 +335,54 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
     padding: 40,
     alignItems: 'center',
-    minHeight: 400,
+    height: 499,
     justifyContent: 'center',
   },
   promoWant: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '400',
+    fontSize: 12,
+    fontWeight: 'bold',
     marginBottom: 10,
+    fontFamily: 'Montserrat-Bold',
+    letterSpacing: -0.3,
   },
   promoDiscount: {
     color: '#FFFFFF',
-    fontSize: 48,
+    fontSize: 64,
     fontWeight: 'bold',
-    lineHeight: 50,
+    lineHeight: 64,
+    fontFamily: 'Montserrat-Bold',
   },
   promoSubtext: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: 'bold',
     marginBottom: 5,
+    fontFamily: 'Montserrat-Bold',
   },
   promoBonus: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '400',
+    fontWeight: 'bold',
     marginBottom: 40,
+    fontFamily: 'Montserrat-Bold',
   },
   promoQuestion: {
     color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '400',
+    fontSize: 12,
+    fontWeight: 'bold',
     marginBottom: 5,
+    fontFamily: 'Montserrat-Bold',
   },
   promoCTA: {
     color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: 'bold',
+    fontFamily: 'Montserrat-Bold',
   },
 
   progressSection: {
-    paddingVertical: 30,
+    paddingVertical: 20,
     paddingHorizontal: 20,
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
@@ -373,16 +390,18 @@ const styles = StyleSheet.create({
   levelIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
-    paddingHorizontal: 10,
+    marginBottom: 15,
+    paddingHorizontal: 28,
+    justifyContent: 'space-between',
+    width: '100%',
   },
   levelPoint: {
     alignItems: 'center',
   },
   levelDot: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 39,
+    height: 39,
+    borderRadius: 19.5,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -390,8 +409,9 @@ const styles = StyleSheet.create({
     // Active state styling if needed
   },
   levelPoints: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 10,
+    fontWeight: '500',
+    fontFamily: 'Montserrat-Medium',
   },
   levelLine: {
     width: 30,
@@ -400,144 +420,187 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   journeyText: {
-    fontSize: 16,
-    color: '#666666',
-    marginBottom: 40,
+    fontSize: 13,
+    color: '#6F6F6F',
+    marginBottom: 25,
     textAlign: 'center',
     fontWeight: '400',
+    fontFamily: 'Montserrat-Regular',
+    lineHeight: 20,
   },
   pointsSection: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 30,
+    paddingHorizontal: 37,
+    width: '100%',
   },
   currentPointsLabel: {
     fontSize: 16,
-    fontWeight: '400',
+    fontWeight: '500',
     color: '#000000',
-    marginBottom: 15,
+    marginBottom: 8,
     textDecorationLine: 'underline',
+    fontFamily: 'Montserrat-Medium',
   },
   pointsRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    gap: 50,
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
     width: '100%',
+    paddingRight: 37,
   },
   currentPoints: {
-    fontSize: 48,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '500',
     color: '#000000',
-    lineHeight: 48,
+    lineHeight: 19,
+    fontFamily: 'Montserrat-Medium',
   },
   pointsUsedSection: {
-    alignItems: 'center',
+    alignItems: 'flex-end',
   },
   pointsUsed: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#FF6B6B',
-    lineHeight: 32,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#CA3327',
+    lineHeight: 19,
+    fontFamily: 'Montserrat-Medium',
+    textAlign: 'right',
   },
   pointsUsedLabel: {
-    fontSize: 14,
-    color: '#FF6B6B',
-    marginTop: 5,
-    fontWeight: '400',
+    fontSize: 16,
+    color: '#CD4035',
+    marginTop: 8,
+    fontFamily: 'Montserrat-Medium',
+    fontWeight: '500',
+    textAlign: 'right',
   },
 
   // Giveaways Tab Styles
   yellowSection: {
-    backgroundColor: '#FFEB3B',
-    padding: 20,
-    minHeight: 300,
-    justifyContent: 'center',
+    backgroundColor: '#FFFB25',
+    paddingTop: 17,
+    paddingBottom: 17,
+    paddingHorizontal: 20,
+    height: 374,
+    width: '100%',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
   expiresText: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#000000',
-    marginBottom: 10,
+    marginBottom: 14,
+    fontWeight: '500',
+    textAlign: 'center',
+    fontFamily: 'Montserrat-Medium',
   },
   giveawayTitle: {
-    fontSize: 24,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#000000',
-    marginBottom: 40,
+    marginBottom: 250,
+    textAlign: 'center',
+    fontFamily: 'Montserrat-Bold',
   },
   membersExclusiveButton: {
     backgroundColor: 'transparent',
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#000000',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    alignSelf: 'flex-start',
+    height: 23,
+    width: 204,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 11,
   },
   membersExclusiveText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '400',
     color: '#000000',
+    fontFamily: 'Montserrat-Regular',
   },
 
   staticContent: {
-    backgroundColor: '#E0E0E0',
-    padding: 20,
+    backgroundColor: '#FFFFFF',
+    paddingTop: 17,
+    paddingHorizontal: 20,
+    paddingBottom: 20, // Add some bottom padding
     flex: 1,
+    minHeight: 124,
   },
   expiresTextStatic: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#000000',
-    marginBottom: 10,
+    marginBottom: 14,
+    fontWeight: '500',
+    textAlign: 'center',
+    fontFamily: 'Montserrat-Medium',
   },
   giveawayTitleStatic: {
-    fontSize: 24,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#000000',
     marginBottom: 20,
+    textAlign: 'center',
+    fontFamily: 'Montserrat-Bold',
   },
 
   // Auth Buttons
   authButtons: {
     flexDirection: 'row',
-    gap: 12,
-    marginHorizontal: 20,
+    justifyContent: 'space-between',
+    marginHorizontal: 12,
+    marginTop: 45,
     marginBottom: 30,
+    paddingHorizontal: 0,
   },
   signInButton: {
-    flex: 1,
     backgroundColor: '#000000',
-    paddingVertical: 18,
-    borderRadius: 30,
+    paddingVertical: 16,
+    paddingHorizontal: 51,
+    borderRadius: 100,
     alignItems: 'center',
+    justifyContent: 'center',
+    height: 51,
+    width: 162,
   },
   signInButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '500',
+    fontFamily: 'Montserrat-Medium',
   },
   createAccountButton: {
-    flex: 1,
     backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: '#000000',
-    paddingVertical: 18,
-    borderRadius: 30,
+    paddingVertical: 16,
+    paddingHorizontal: 51,
+    borderRadius: 100,
     alignItems: 'center',
+    justifyContent: 'center',
+    height: 51,
+    width: 164,
+    marginLeft: 26,
   },
   createAccountButtonText: {
     color: '#000000',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '500',
+    fontFamily: 'Montserrat-Medium',
   },
 
   // Preferences Sections
   preferencesSection: {
     marginBottom: 30,
+    paddingHorizontal: 20,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '400',
     color: '#000000',
     marginBottom: 15,
+    fontFamily: 'Montserrat-Regular',
   },
   preferenceItem: {
     flexDirection: 'row',
@@ -545,7 +608,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: '#D6D6D6',
   },
   preferenceLeft: {
     flexDirection: 'row',
@@ -556,24 +619,27 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   preferenceMain: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500',
     color: '#000000',
+    fontFamily: 'Montserrat-Medium',
   },
   preferenceLabel: {
-    fontSize: 12,
-    color: '#666666',
+    fontSize: 15,
+    color: '#767676',
     marginTop: 2,
+    fontFamily: 'Montserrat-Medium',
   },
   chevron: {
     fontSize: 20,
-    color: '#666666',
+    color: '#000000',
   },
   shippingNote: {
-    fontSize: 12,
-    color: '#666666',
+    fontSize: 10,
+    color: '#767676',
     marginTop: 10,
-    lineHeight: 16,
+    lineHeight: 12,
+    fontFamily: 'Montserrat-Medium',
   },
 
   // Radio buttons
@@ -582,31 +648,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#D6D6D6',
   },
   radioLabel: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#000000',
+    fontFamily: 'Montserrat-Medium',
   },
   radioButton: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
+    width: 13,
+    height: 13,
+    borderRadius: 6.5,
+    borderWidth: 1,
     borderColor: '#000000',
     justifyContent: 'center',
     alignItems: 'center',
   },
   radioButtonSelected: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
     backgroundColor: '#000000',
   },
   preferenceNote: {
-    fontSize: 12,
-    color: '#666666',
-    marginTop: 10,
-    lineHeight: 16,
+    fontSize: 10,
+    color: '#767676',
+    marginTop: 6,
+    lineHeight: 12,
+    fontFamily: 'Montserrat-Medium',
   },
 
   // Checkboxes
@@ -615,23 +685,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#D6D6D6',
   },
   checkboxLabel: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#000000',
+    fontFamily: 'Montserrat-Medium',
+  },
+  checkboxLabelGrayed: {
+    fontSize: 15,
+    color: '#D6D6D6',
+    fontFamily: 'Montserrat-Medium',
   },
   checkbox: {
     width: 20,
     height: 20,
-    borderWidth: 2,
-    borderColor: '#000000',
+    borderWidth: 1,
+    borderColor: '#BCBCBC',
+    borderRadius: 3,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkmark: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#000000',
+    color: '#111111',
   },
 });
 

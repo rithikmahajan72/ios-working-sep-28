@@ -14,52 +14,10 @@ import {
 } from 'react-native';
 import { FontSizes, FontWeights, Spacing, BorderRadius } from '../constants';
 import { GlobalSearchIcon, FilterIcon, GlobalCartIcon, HeartIcon } from '../assets/icons';
+import { useFavorites } from '../contexts/FavoritesContext';
+import { PRODUCTS } from '../constants/products';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-// Sample product data matching the Figma design
-const SAMPLE_PRODUCTS = [
-  {
-    id: '1',
-    name: 'Cosmic Unity 3 N7',
-    brand: 'Basketball Shoes', 
-    price: 'US$170',
-    colors: '1 Colours',
-    image: null, // Placeholder for now
-    category: 'TOP WEAR',
-    isWishlisted: false,
-  },
-  {
-    id: '2',
-    name: 'Nike Benassi N7',
-    brand: 'Slides',
-    price: 'US$35',
-    colors: '1 Colours', 
-    image: null, // Placeholder for now
-    category: 'TOP WEAR',
-    isWishlisted: false,
-  },
-  {
-    id: '3',
-    name: 'Nike Sportswear Club Fleece N7',
-    brand: 'Pullover Hoodie',
-    price: 'US$75',
-    colors: '5 Colours',
-    image: null, // Placeholder for now
-    category: 'BOTTOM WEAR',
-    isWishlisted: false,
-  },
-  {
-    id: '4',
-    name: 'Nike Sportswear Club Fleece N7',
-    brand: 'Joggers',
-    price: 'US$65',
-    colors: '5 Colours',
-    image: null, // Placeholder for now
-    category: 'BOTTOM WEAR',
-    isWishlisted: false,
-  },
-];
 
 // FilterModal component
 const FilterModal = ({ 
@@ -253,23 +211,27 @@ const FILTER_OPTIONS = {
 const CollectionScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('TOP WEAR');
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [products, setProducts] = useState(SAMPLE_PRODUCTS);
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedSort, setSelectedSort] = useState('ASCENDING PRICE');
 
+  // Use the FavoritesContext
+  const { toggleFavorite, isFavorite } = useFavorites();
+
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
-  const filteredProducts = products.filter(product => 
+  const filteredProducts = PRODUCTS.filter(product => 
     activeTab === 'TOP WEAR' ? product.category === 'TOP WEAR' : product.category === 'BOTTOM WEAR'
   );
 
-  const toggleWishlist = (productId) => {
-    setProducts(products.map(product => 
-      product.id === productId 
-        ? { ...product, isWishlisted: !product.isWishlisted }
-        : product
-    ));
+  const handleToggleWishlist = (productId) => {
+    const wasAdded = toggleFavorite(productId);
+    // Optional: You can add visual feedback here like toast messages
+    if (wasAdded) {
+      console.log('Added to favorites! Check your Favourites tab to see all saved items.');
+    } else {
+      console.log('Removed from favorites');
+    }
   };
 
   const openFilterModal = () => {
@@ -297,18 +259,33 @@ const CollectionScreen = ({ navigation }) => {
   const renderSeparator = () => <View style={styles.itemSeparator} />;
 
   const renderProductItem = ({ item }) => (
-    <TouchableOpacity style={styles.productCard}>
+    <TouchableOpacity 
+      style={styles.productCard}
+      onPress={() => navigation?.navigate('ProductDetailsMain', { 
+        product: item,
+        previousScreen: 'Collection' 
+      })}
+    >
       <View style={styles.productImageContainer}>
         <View style={styles.productImagePlaceholder}>
           <View style={styles.productPlaceholderIcon} />
         </View>
         <TouchableOpacity 
           style={styles.heartButton}
-          onPress={() => toggleWishlist(item.id)}
+          onPress={(e) => {
+            e.stopPropagation();
+            handleToggleWishlist(item.id);
+          }}
         >
-          <HeartIcon size={19} filled={item.isWishlisted} />
+          <HeartIcon size={19} filled={isFavorite(item.id)} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.cartButton}>
+        <TouchableOpacity 
+          style={styles.cartButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            // Handle cart action here if needed
+          }}
+        >
           <GlobalCartIcon size={16} />
         </TouchableOpacity>
       </View>
@@ -332,7 +309,7 @@ const CollectionScreen = ({ navigation }) => {
             style={styles.searchButton}
             onPress={() => navigation?.navigate('SearchScreen', { previousScreen: 'Collection' })}
           >
-            <GlobalSearchIcon size={20} />
+            <GlobalSearchIcon size={24} />
           </TouchableOpacity>
         </View>
 
@@ -431,8 +408,9 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 15,
-    paddingBottom: 20,
+    paddingTop: 54,
+    paddingBottom: 16,
+    backgroundColor: '#FFFFFF',
   },
   searchButton: {
     width: 24,
@@ -444,14 +422,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    marginBottom: 20,
+    marginBottom: 8,
+    marginTop: 8,
   },
   filterButton: {
     width: 26,
     height: 26,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 16,
   },
   tabScrollView: {
     flex: 1,
@@ -461,8 +440,8 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
   tab: {
-    paddingHorizontal: 30,
-    paddingVertical: 8,
+    paddingHorizontal: 32,
+    paddingVertical: 9,
     marginRight: 16,
     borderWidth: 1,
     borderColor: '#CACACA',
@@ -470,6 +449,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     height: 31,
+    width: 129,
   },
   activeTab: {
     backgroundColor: 'transparent',
@@ -490,9 +470,10 @@ const styles = StyleSheet.create({
     paddingTop: 40,
   },
   productRow: {
-    justifyContent: 'space-between',
-    paddingHorizontal: 6,
+    justifyContent: 'flex-start',
+    paddingHorizontal: 0,
     marginBottom: 40,
+    gap: 6,
   },
   productCard: {
     width: 184,
@@ -558,6 +539,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingTop: 14,
     paddingBottom: 0,
+    width: '100%',
   },
   productName: {
     fontSize: 14,

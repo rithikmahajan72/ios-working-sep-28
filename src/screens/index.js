@@ -41,6 +41,7 @@ export { default as DeleteAccountConfirmationModal } from './deleteaccountconfir
 export { default as ProfileVisibilityScreen } from './profilevisibility';
 export { default as ContactUsScreen } from './contactus';
 export { default as InvoiceScreen } from './invoice';
+export { default as InvoiceDetails } from './invoicedetails';
 export { default as LoveUsRateUs } from './loveusrateus';
 export { default as FAQScreen } from './faq';
 export { default as ProductViewOne } from './productviewone';

@@ -95,22 +95,18 @@ const BottomNavigationBar = ({ activeTab = 'Home', onTabChange }) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: -4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 8,
+    // Removed shadow and elevation for modern seamless look
+    // No borders or visual separations for clean integration
   },
   navigationBar: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
     paddingTop: 13,
     paddingHorizontal: 15,
-    height: 54,
+    paddingBottom: 5, // Added bottom padding for better spacing
+    height: 60, // Slightly increased height for better touch targets
     alignItems: 'flex-start',
+    // Seamless integration with screen content
   },
   tabButton: {
     flex: 1,
@@ -118,7 +114,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     paddingTop: 0,
     position: 'relative',
-    minHeight: 37,
+    minHeight: 40, // Increased for better touch targets
   },
   tabLabel: {
     fontSize: 10,

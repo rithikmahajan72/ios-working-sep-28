@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
@@ -8,13 +7,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Dimensions,
 } from 'react-native';
-import { Colors, FontSizes, FontWeights, FontFamilies, Spacing } from '../constants';
+import { Colors, FontFamilies } from '../constants';
 import { SearchIcon } from '../assets/icons';
 import GlobalBackButton from '../components/GlobalBackButton';
-
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Flag Icon Component (placeholder)
 const FlagIcon = ({ country, size = 24 }) => (
@@ -23,56 +19,62 @@ const FlagIcon = ({ country, size = 24 }) => (
   </View>
 );
 
+// Blue Checkmark Component
+const BlueCheckmark = () => (
+  <View style={styles.checkmarkContainer}>
+    <View style={styles.checkmark}>
+      <Text style={styles.checkmarkText}>✓</Text>
+    </View>
+  </View>
+);
+
 const Region = ({ navigation }) => {
   const countryList = [
-    { name: "Afghanistan", code: "AF" },
-    { name: "Albania", code: "AL" },
-    { name: "Brazil", code: "BR" },
-    { name: "Belgium", code: "BE" },
-    { name: "Canada", code: "CA" },
-    { name: "Denmark", code: "DK" },
-    { name: "Ethiopia", code: "ET" },
-    { name: "France", code: "FR" },
-    { name: "Germany", code: "DE" },
-    { name: "India", code: "IN" },
-    { name: "Japan", code: "JP" },
-    { name: "Kenya", code: "KE" },
-    { name: "Mexico", code: "MX" },
-    { name: "Nigeria", code: "NG" },
-    { name: "Norway", code: "NO" },
-    { name: "Poland", code: "PL" },
-    { name: "Qatar", code: "QA" },
-    { name: "Russia", code: "RU" },
-    { name: "Spain", code: "ES" },
-    { name: "Thailand", code: "TH" },
-    { name: "United Kingdom", code: "GB" },
-    { name: "United States", code: "US" },
-    { name: "Vietnam", code: "VN" },
+    { name: "Afghanistan", code: "AF", selected: true },
+    { name: "Albania", code: "AL", selected: false },
+    { name: "Brazil", code: "BR", selected: false },
+    { name: "Belgium", code: "BE", selected: false },
+    { name: "Canada", code: "CA", selected: false },
+    { name: "Denmark", code: "DK", selected: false },
+    { name: "Ethiopia", code: "ET", selected: false },
+    { name: "France", code: "FR", selected: false },
+    { name: "Germany", code: "DE", selected: false },
+    { name: "India", code: "IN", selected: false },
+    { name: "Japan", code: "JP", selected: false },
+    { name: "Kenya", code: "KE", selected: false },
+    { name: "Mexico", code: "MX", selected: false },
+    { name: "Nigeria", code: "NG", selected: false },
+    { name: "Norway", code: "NO", selected: false },
+    { name: "Poland", code: "PL", selected: false },
+    { name: "Qatar", code: "QA", selected: false },
+    { name: "Russia", code: "RU", selected: false },
+    { name: "Spain", code: "ES", selected: false },
+    { name: "Thailand", code: "TH", selected: false },
+    { name: "United Kingdom", code: "GB", selected: false },
+    { name: "United States", code: "US", selected: false },
+    { name: "Vietnam", code: "VN", selected: false },
   ];
 
-  const [selectedLetter, setSelectedLetter] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState("Afghanistan");
   const [searchText, setSearchText] = useState('');
 
   const alphabet = [
-    "All", "A", "B", "C", "D", "E", "F", "G",
+    "A", "B", "C", "D", "E", "F", "G",
     "H", "I", "J", "K", "L", "M", "N", "O",
     "P", "Q", "R", "S", "T", "U", "V", "W",
     "X", "Y", "Z"
   ];
 
-  // Filter countries based on search text and selected letter
+  // Filter countries based on search text
   const filteredCountries = countryList.filter(item => {
     const matchesSearch = searchText === '' || 
       item.name.toLowerCase().includes(searchText.toLowerCase());
     
-    const matchesLetter = selectedLetter === null || 
-      selectedLetter === "All" || 
-      item.name.toUpperCase().startsWith(selectedLetter);
-    
-    return matchesSearch && matchesLetter;
+    return matchesSearch;
   });
 
   const handleCountrySelect = (country) => {
+    setSelectedCountry(country.name);
     // Handle country selection - you can add logic here to store selected region
     // Navigate back to rewards tab
     navigation.goBack();
@@ -84,25 +86,25 @@ const Region = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* Back button */}
-      <GlobalBackButton onPress={handleBackPress} style={styles.backButton} />
-
-      {/* HEADING */}
-      <View style={styles.headingContainer}>
-        <Text style={styles.heading}>Region</Text>
+      {/* Header with back button and title */}
+      <View style={styles.header}>
+        <View style={styles.backButtonContainer}>
+          <GlobalBackButton onPress={handleBackPress} />
+        </View>
+        <Text style={styles.headerTitle}>Region</Text>
+        <View style={styles.headerSpacer} />
       </View>
 
-      {/* Sub heading */}
-      <View style={styles.subHeadingContainer}>
-        <Text style={styles.subHeading}>
-          Choose a country or region. This affects the country you are billed in, 
-          availability of items, price and delivery options.
+      {/* Description */}
+      <View style={styles.descriptionContainer}>
+        <Text style={styles.description}>
+          Choose a country or region. This affects the country you are billed in, availability of items, price and delivery options.
         </Text>
       </View>
 
       {/* Search bar */}
       <View style={styles.searchContainer}>
-        <SearchIcon size={SCREEN_HEIGHT * 0.035} color={Colors.textSecondary} />
+        <SearchIcon size={20} color={Colors.textSecondary} />
         <TextInput
           placeholder="Search"
           style={styles.searchInput}
@@ -113,55 +115,43 @@ const Region = ({ navigation }) => {
         />
       </View>
 
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
+      {/* Countries list with alphabet index */}
+      <View style={styles.contentContainer}>
         <ScrollView
+          style={styles.countriesScrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Result and alphabets */}
-          <View style={styles.contentContainer}>
-            {/* Countries list */}
-            <View style={styles.countriesContainer}>
-              {filteredCountries.map((item, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.countryItem}
-                  onPress={() => handleCountrySelect(item)}
-                >
-                  <FlagIcon country={item.code} size={SCREEN_HEIGHT * 0.035} />
-                  <Text style={styles.countryName}>
-                    {item.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* Alphabet filter */}
-            <View style={styles.alphabetContainer}>
-              {alphabet.map((letter) => (
-                <TouchableOpacity 
-                  key={letter} 
-                  onPress={() => setSelectedLetter(letter)}
-                  style={styles.alphabetButton}
-                >
-                  <Text
-                    style={[
-                      styles.alphabetText,
-                      selectedLetter === letter && styles.alphabetTextSelected
-                    ]}
-                  >
-                    {letter}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
+          {filteredCountries.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.countryItem}
+              onPress={() => handleCountrySelect(item)}
+            >
+              <FlagIcon country={item.code} size={24} />
+              <Text style={styles.countryName}>
+                {item.name}
+              </Text>
+              {selectedCountry === item.name && <BlueCheckmark />}
+            </TouchableOpacity>
+          ))}
         </ScrollView>
-      </KeyboardAvoidingView>
+
+        {/* Alphabet index */}
+        <View style={styles.alphabetContainer}>
+          {alphabet.map((letter) => (
+            <TouchableOpacity 
+              key={letter} 
+              style={styles.alphabetButton}
+            >
+              <Text style={styles.alphabetText}>
+                {letter}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
     </View>
   );
 };
@@ -170,108 +160,134 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.white,
-    paddingTop: Platform.OS === 'ios' ? '15%' : Spacing.xxl,
-    paddingHorizontal: Spacing.lg,
-    gap: Spacing.lg,
+    paddingTop: Platform.OS === 'ios' ? 54 : 30,
   },
-  backButton: {
-    marginLeft: -10,
-    alignSelf: 'flex-start',
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: Colors.white,
   },
-  headingContainer: {},
-  heading: {
-    fontFamily: FontFamilies.bold,
-    fontSize: FontSizes.xxxl,
-    fontWeight: FontWeights.bold,
+  backButtonContainer: {
+    width: 68,
+    alignItems: 'flex-start',
+  },
+  headerTitle: {
+    flex: 1,
+    textAlign: 'center',
+    fontFamily: FontFamilies.medium,
+    fontSize: 16,
+    fontWeight: '500',
     color: Colors.textPrimary,
+    letterSpacing: -0.4,
   },
-  subHeadingContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+  headerSpacer: {
+    width: 68,
   },
-  subHeading: {
-    fontFamily: FontFamilies.bold,
-    fontSize: FontSizes.lg,
-    fontWeight: FontWeights.bold,
+  descriptionContainer: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+  },
+  description: {
+    fontFamily: FontFamilies.medium,
+    fontSize: 11,
+    fontWeight: '500',
     color: Colors.textPrimary,
-    lineHeight: FontSizes.lg * 1.4,
+    lineHeight: 13.2,
+    letterSpacing: -0.066,
   },
   searchContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     alignItems: 'center',
-    borderBottomColor: Colors.textPrimary,
+    paddingHorizontal: 24,
+    paddingBottom: 8,
     borderBottomWidth: 1,
-    width: '100%',
-    alignSelf: "center",
-    paddingBottom: Spacing.xs,
+    borderBottomColor: Colors.textPrimary,
+    marginHorizontal: 24,
   },
   searchInput: {
-    fontFamily: FontFamilies.bold,
-    fontSize: FontSizes.lg,
-    fontWeight: FontWeights.bold,
     flex: 1,
-    paddingLeft: Spacing.md,
-    alignItems: 'center',
+    fontFamily: FontFamilies.medium,
+    fontSize: 16,
+    fontWeight: '500',
     color: Colors.textPrimary,
-  },
-  keyboardAvoidingView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    gap: Spacing.lg,
+    paddingLeft: 11,
+    letterSpacing: -0.4,
   },
   contentContainer: {
-    flexDirection: 'row',
-    gap: Spacing.xs,
-  },
-  countriesContainer: {
-    gap: Spacing.xs,
     flex: 1,
+    flexDirection: 'row',
+    paddingTop: 24,
+  },
+  countriesScrollView: {
+    flex: 1,
+    paddingLeft: 24,
+  },
+  scrollContent: {
+    paddingBottom: 24,
   },
   countryItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderBottomColor: Colors.borderLight,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    width: "100%",
-    alignSelf: "center",
-    paddingVertical: Spacing.md,
+    borderBottomColor: '#D6D6D6',
+    marginRight: 24,
   },
   flagIcon: {
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.backgroundSecondary,
-    borderRadius: 4,
+    borderRadius: 2,
+    marginRight: 16,
   },
   flagText: {
     fontSize: 16,
   },
   countryName: {
-    fontFamily: FontFamilies.bold,
-    fontSize: FontSizes.lg,
-    fontWeight: FontWeights.bold,
     flex: 1,
-    paddingLeft: Spacing.md,
+    fontFamily: FontFamilies.medium,
+    fontSize: 15,
+    fontWeight: '500',
     color: Colors.textPrimary,
+    lineHeight: 18,
+  },
+  checkmarkContainer: {
+    marginLeft: 'auto',
+  },
+  checkmark: {
+    width: 20,
+    height: 20,
+    backgroundColor: 'white',
+    borderRadius: 3,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkmarkText: {
+    fontSize: 12,
+    color: '#029CFE',
+    fontWeight: 'bold',
   },
   alphabetContainer: {
-    zIndex: 10,
-    gap: 1.5,
-    paddingHorizontal: Spacing.xs,
+    paddingRight: 16,
+    paddingTop: 4,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
   },
   alphabetButton: {
-    padding: 2,
+    paddingVertical: 1,
+    minHeight: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   alphabetText: {
-    fontSize: FontSizes.sm,
-    fontFamily: FontFamilies.bold,
-    fontWeight: FontWeights.bold,
-    color: Colors.textTertiary,
+    fontSize: 12,
+    fontFamily: FontFamilies.medium,
+    fontWeight: '500',
+    color: '#767676',
     textAlign: 'center',
-  },
-  alphabetTextSelected: {
-    color: Colors.primary,
+    lineHeight: 19.32,
   },
 });
 

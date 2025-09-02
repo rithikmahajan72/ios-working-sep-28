@@ -3,8 +3,8 @@ import React, { createContext, useContext, useState } from 'react';
 const FavoritesContext = createContext();
 
 export const FavoritesProvider = ({ children }) => {
-  // Initialize with some demo favorites for testing
-  const [favorites, setFavorites] = useState(new Set(['1', '2', '3', '4']));
+  // Initialize with empty favorites
+  const [favorites, setFavorites] = useState(new Set());
 
   const addToFavorites = (productId) => {
     const newFavorites = new Set(favorites);

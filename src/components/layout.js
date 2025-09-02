@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import BottomNavigationBar from './bottomnavigationbar';
 import { Colors, FontSizes, FontWeights, Spacing } from '../constants';
-import { HomeScreen, FavouritesScreen, FavouritesContent, FavouritesContentEditView, FavouritesModalOverlayForSizeSelection, FavouritesAddedToBagConfirmationModal, FavouritesSizeChartReference, ShopScreen, CollectionScreen, FiltersScreen, SearchScreen, ScanBarcodeFlow, RewardsScreen, ProfileScreen, BagScreen, CreateAccountMobileNumber, CreateAccountEmail, CreateAccountEmailSuccessModal, CreateAccountMobileNumberVerification, CreateAccountMobileNumberAccountCreatedConfirmationModal, LoginAccountMobileNumber, LoginAccountEmail, ForgotLoginPassword, ForgotLoginPasswordVerificationCode, ForgotLoginPasswordCreateNewPassword, ForgotLoginPasswordConfirmationModal, LoginAccountMobileNumberVerificationCode, LoginAccountEmailVerificationCode, TermsAndConditions, PreferenceSelector, OrdersScreen, EditProfile, SettingsScreen, DeliveryAddressesSettings, CommunicationPreferences, LinkedAccountScreen, DeleteAccount, DeleteAccountConfirmation, ProfileVisibilityScreen, ContactUsScreen, InvoiceScreen, LoveUsRateUs, FAQScreen, ProductViewOne, ProductViewTwo, ProductViewThree, ProductDetailsMain, ProductDetailsMainReview, ProductDetailsReviewThreePointSelection, ProductDetailsWrittenUserReview, DeliveryOptionsStepOneScreen, Language, Region, MembersExclusive, PointsHistory, InviteAFriend, OrdersReturnExchange, OrdersExchangeSizeSelectionChart, OrdersCancelOrderModal, OrdersReturnRequest, OrdersReturnAcceptedModal, Inbox, OrderConfirmationPhone, DeliveryOptionsStepFourIfCustomRequired } from '../screens';
+import { HomeScreen, FavouritesScreen, FavouritesContent, FavouritesContentEditView, FavouritesModalOverlayForSizeSelection, FavouritesAddedToBagConfirmationModal, FavouritesSizeChartReference, ShopScreen, CollectionScreen, FiltersScreen, SearchScreen, ScanBarcodeFlow, RewardsScreen, ProfileScreen, BagScreen, CreateAccountMobileNumber, CreateAccountEmail, CreateAccountEmailSuccessModal, CreateAccountMobileNumberVerification, CreateAccountMobileNumberAccountCreatedConfirmationModal, LoginAccountMobileNumber, LoginAccountEmail, ForgotLoginPassword, ForgotLoginPasswordVerificationCode, ForgotLoginPasswordCreateNewPassword, ForgotLoginPasswordConfirmationModal, LoginAccountMobileNumberVerificationCode, LoginAccountEmailVerificationCode, TermsAndConditions, PreferenceSelector, OrdersScreen, EditProfile, SettingsScreen, DeliveryAddressesSettings, CommunicationPreferences, LinkedAccountScreen, DeleteAccount, DeleteAccountConfirmation, ProfileVisibilityScreen, ContactUsScreen, InvoiceScreen, InvoiceDetails, LoveUsRateUs, FAQScreen, ProductViewOne, ProductViewTwo, ProductViewThree, ProductDetailsMain, ProductDetailsMainReview, ProductDetailsReviewThreePointSelection, ProductDetailsWrittenUserReview, DeliveryOptionsStepOneScreen, Language, Region, MembersExclusive, PointsHistory, InviteAFriend, OrdersReturnExchange, OrdersExchangeSizeSelectionChart, OrdersCancelOrderModal, OrdersReturnRequest, OrdersReturnAcceptedModal, Inbox, OrderConfirmationPhone, DeliveryOptionsStepFourIfCustomRequired } from '../screens';
 
 // Placeholder content components for each tab
 const HomeContent = ({ navigation }) => <HomeScreen navigation={navigation} />;
@@ -164,6 +164,8 @@ const EnhancedLayout = () => {
         return <ContactUsScreen navigation={navigation} />;
       case 'Invoice':
         return <InvoiceScreen navigation={navigation} />;
+      case 'InvoiceDetails':
+        return <InvoiceDetails navigation={navigation} route={{ params: routeParams }} />;
       case 'LoveUsRateUs':
         return <LoveUsRateUs navigation={navigation} route={{ params: routeParams }} />;
       case 'FAQ':
@@ -185,7 +187,7 @@ const EnhancedLayout = () => {
       case 'DeliveryOptionsStepOneScreen':
         return <DeliveryOptionsStepOneScreen navigation={navigation} />;
       case 'Language':
-        return <Language navigation={navigation} />;
+        return <Language navigation={navigation} route={{ params: routeParams }} />;
       case 'Region':
         return <Region navigation={navigation} />;
       case 'MembersExclusive':
