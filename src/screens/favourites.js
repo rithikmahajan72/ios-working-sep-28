@@ -22,7 +22,8 @@ const FavouritesScreen = React.memo(({ navigation }) => {
 
   // Optimized handlers with useCallback
   const handleBackPress = useCallback(() => {
-    navigation.goBack();
+    console.log('Back button pressed, navigating to Home');
+    navigation.navigate('Home');
   }, [navigation]);
 
   const handleAddFavouritesNow = useCallback(() => {
@@ -46,7 +47,7 @@ const FavouritesScreen = React.memo(({ navigation }) => {
             accessibilityLabel="Go back"
             accessibilityHint="Navigate to previous screen"
           >
-            <GlobalBackButton />
+            <GlobalBackButton onPress={handleBackPress} />
           </TouchableOpacity>
           <Text style={styles.headerTitle} accessibilityRole="header">Favourites</Text>
           <View style={styles.headerRight} />
@@ -98,7 +99,7 @@ const FavouritesScreen = React.memo(({ navigation }) => {
           accessibilityLabel="Go back"
           accessibilityHint="Navigate to previous screen"
         >
-          <GlobalBackButton />
+          <GlobalBackButton onPress={handleBackPress} />
         </TouchableOpacity>
         <Text style={styles.headerTitle} accessibilityRole="header">Favourites</Text>
         <View style={styles.headerRight} />

@@ -34,28 +34,37 @@ const Inbox = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Text style={styles.backArrow}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Inbox</Text>
-        <View style={styles.placeholder} />
-      </View>
-
-      {/* Messages */}
-      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        <View style={styles.messagesContainer}>
-          {messages.map(renderMessage)}
+    <View style={styles.container}>
+      <SafeAreaView style={styles.topSafeArea}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <Text style={styles.backArrow}>‹</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Inbox</Text>
+          <View style={styles.placeholder} />
         </View>
-      </ScrollView>
-    </SafeAreaView>
+
+        {/* Messages */}
+        <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+          <View style={styles.messagesContainer}>
+            {messages.map(renderMessage)}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+      
+      {/* Bottom Safe Area for home indicator */}
+      <SafeAreaView style={styles.bottomSafeArea} />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+  },
+  topSafeArea: {
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
@@ -104,7 +113,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     shadowColor: 'rgba(0, 0, 0, 0.25)',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
+    shadowOpacity: 0.25,
     shadowRadius: 30,
     elevation: 8,
     height: 76,
@@ -132,9 +141,11 @@ const styles = StyleSheet.create({
     width: 35,
     height: 35,
     borderRadius: 8,
-    backgroundColor: '#E6E6E6',
-    borderWidth: 2,
-    borderColor: '#E6E6E6',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+  },
+  bottomSafeArea: {
+    backgroundColor: '#F5F5F5',
   },
 });
 

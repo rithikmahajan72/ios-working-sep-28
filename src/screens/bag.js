@@ -30,7 +30,8 @@ import {
   JCBIcon,
   MetroIcon,
   MaestroIcon,
-  CaretDownIcon
+  CaretDownIcon,
+  BackIcon
 } from '../assets/icons';
 
 // SwipeableBagItem Component - with swipe-to-delete functionality using PanResponder
@@ -394,7 +395,7 @@ const BagScreen = ({ navigation, route }) => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
-          <Text style={styles.backIcon}>‹</Text>
+          <BackIcon color="#000000" size={24} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Bag</Text>
         <View style={styles.headerRight} />
@@ -585,12 +586,8 @@ const styles = StyleSheet.create({
   backButton: {
     width: 68,
     alignItems: 'flex-start',
+    justifyContent: 'center',
     paddingVertical: 8,
-  },
-  backIcon: {
-    fontSize: 24,
-    color: '#000000',
-    fontWeight: 'bold',
   },
   headerTitle: {
     fontSize: 16,

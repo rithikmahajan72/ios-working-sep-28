@@ -12,7 +12,7 @@ const FavouritesAddedToBagConfirmationModal = ({ navigation }) => {
 
   const handleViewBag = () => {
     // Navigate to bag screen and close all modals
-    navigation.navigate('Bag');
+    navigation.navigate('Bag', { previousScreen: 'favourites' });
   };
 
   const handleClose = () => {

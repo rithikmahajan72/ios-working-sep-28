@@ -37,6 +37,11 @@ const HomeScreen = React.memo(({ navigation }) => {
     navigation?.navigate('favourites');
   }, [navigation]);
 
+  const handleNavigateToBag = useCallback(() => {
+    console.log('Attempting to navigate to Bag screen');
+    navigation?.navigate('Bag', { previousScreen: 'Home' });
+  }, [navigation]);
+
   const handleNavigateToProduct = useCallback(() => {
     navigation?.navigate('ProductViewOne');
   }, [navigation]);
@@ -93,9 +98,10 @@ const HomeScreen = React.memo(({ navigation }) => {
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.iconButton}
+            onPress={handleNavigateToBag}
             accessibilityRole="button"
-            accessibilityLabel="Lock"
-            accessibilityHint="Lock feature"
+            accessibilityLabel="Shopping bag"
+            accessibilityHint="Navigate to shopping bag"
           >
             <LockIcon size={24} color="#000000" />
           </TouchableOpacity>

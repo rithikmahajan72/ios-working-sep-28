@@ -453,7 +453,7 @@ const ProductDetailsMain = ({ navigation, route }) => {
         {/* Shopping Bag Icon */}
         <TouchableOpacity 
           style={styles.bagButton}
-          onPress={() => navigation.navigate('Bag')}
+          onPress={() => navigation.navigate('Bag', { previousScreen: 'ProductViewOne' })}
         >
           <View style={styles.bagButtonContainer}>
             <ShoppingBagIcon />
@@ -658,7 +658,7 @@ const ProductDetailsMain = ({ navigation, route }) => {
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.cartButton}
-          onPress={() => navigation.navigate('Bag')}
+          onPress={() => navigation.navigate('Bag', { previousScreen: 'ProductViewOne' })}
         >
           <View style={styles.cartButtonContainer}>
             <ShoppingBagIcon />

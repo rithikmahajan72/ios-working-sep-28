@@ -314,6 +314,7 @@ const ProfileScreen = React.memo(({ navigation }) => {
         visible={showLogoutModal}
         onClose={handleCloseLogoutModal}
         onSignOut={handleSignOut}
+        navigation={navigation}
       />
       
       <ContactUsScreen

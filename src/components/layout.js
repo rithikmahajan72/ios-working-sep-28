@@ -60,6 +60,10 @@ const EnhancedLayout = () => {
       
       setRouteParams(null);
     },
+    canGoBack: () => {
+      // Return true if there's a previous screen to go back to
+      return routeParams?.previousScreen != null;
+    },
     route: { params: routeParams },
   };
 
@@ -101,7 +105,7 @@ const EnhancedLayout = () => {
         case 'Profile':
           return <ProfileContent navigation={navigation} />;
         case 'Bag':
-          return <BagScreen navigation={navigation} />;
+          return <BagScreen navigation={navigation} route={{ params: routeParams }} />;
         case 'CreateAccountMobileNumber':
           return <CreateAccountMobileNumber navigation={navigation} />;
         case 'CreateAccountEmail':

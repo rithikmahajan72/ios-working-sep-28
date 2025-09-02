@@ -65,11 +65,8 @@ const FAQScreen = ({ navigation }) => {
   };
 
   const handleBack = () => {
-    console.log('FAQ handleBack called, navigating to Profile');
-    if (navigation && navigation.navigate) {
-      navigation.navigate('Profile');
-    } else {
-      console.log('Navigation object is not available');
+    if (navigation && navigation.goBack) {
+      navigation.goBack();
     }
   };
 
@@ -83,7 +80,7 @@ const FAQScreen = ({ navigation }) => {
           accessibilityRole="button"
           accessibilityLabel="Go back"
         >
-          <GlobalBackButton onPress={handleBack} />
+          <GlobalBackButton />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>FAQ</Text>
         <View style={styles.headerRight} />

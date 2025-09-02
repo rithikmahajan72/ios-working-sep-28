@@ -77,7 +77,7 @@ const SizeSelectionModal = ({
     handleClose();
     // Navigate to the Bag screen
     if (navigation && navigation.navigate) {
-      navigation.navigate('Bag');
+      navigation.navigate('Bag', { previousScreen: 'ProductViewOne' });
     } else {
     }
   };

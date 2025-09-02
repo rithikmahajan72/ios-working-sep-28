@@ -247,10 +247,13 @@ const RewardsScreen = ({ navigation, route }) => {
         <View style={styles.preferencesSection}>
           <Text style={styles.sectionTitle}>Additional preferences</Text>
           
-          {ADDITIONAL_PREFERENCES.map((pref) => (
+          {ADDITIONAL_PREFERENCES.map((pref, index) => (
             <TouchableOpacity
               key={pref}
-              style={styles.checkboxItem}
+              style={[
+                styles.checkboxItem, 
+                index === ADDITIONAL_PREFERENCES.length - 1 && styles.lastCheckboxItem
+              ]}
               onPress={() => {
                 if (selectedAdditionalPreferences.includes(pref)) {
                   setSelectedAdditionalPreferences(prev => prev.filter(p => p !== pref));
@@ -290,13 +293,14 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+    paddingBottom: 0, // Remove any bottom padding from SafeAreaView
   },
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
   scrollContentContainer: {
-    paddingBottom: 100, // Add extra padding for bottom navigation
+    paddingBottom: 120, // Moderate padding for bottom navigation
   },
   
   // Tab Styles
@@ -482,7 +486,7 @@ const styles = StyleSheet.create({
     paddingTop: 17,
     paddingBottom: 17,
     paddingHorizontal: 20,
-    height: 374,
+    height: 300, // Increased back to a reasonable size
     width: '100%',
     justifyContent: 'flex-end',
     alignItems: 'center',
@@ -524,7 +528,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     paddingTop: 17,
     paddingHorizontal: 20,
-    paddingBottom: 20, // Add some bottom padding
+    paddingBottom: 40, // Increased bottom padding
     flex: 1,
     minHeight: 124,
   },
@@ -549,20 +553,21 @@ const styles = StyleSheet.create({
   authButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginHorizontal: 12,
-    marginTop: 45,
+    marginHorizontal: 20, // Increased horizontal margin for better spacing
+    marginTop: 15, // Further reduced from 30 to position buttons closer to yellow section
     marginBottom: 30,
     paddingHorizontal: 0,
+    alignItems: 'center', // Ensure buttons are centered
   },
   signInButton: {
     backgroundColor: '#000000',
     paddingVertical: 16,
-    paddingHorizontal: 51,
+    paddingHorizontal: 20, // Reduced from 51 to make button smaller
     borderRadius: 100,
     alignItems: 'center',
     justifyContent: 'center',
     height: 51,
-    width: 162,
+    width: 140, // Reduced from 162 to make room for Create Account button
   },
   signInButtonText: {
     color: '#FFFFFF',
@@ -575,17 +580,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#000000',
     paddingVertical: 16,
-    paddingHorizontal: 51,
+    paddingHorizontal: 15, // Reduced padding for better text fit
     borderRadius: 100,
     alignItems: 'center',
     justifyContent: 'center',
     height: 51,
-    width: 164,
-    marginLeft: 26,
+    width: 180, // Increased width to accommodate "Create Account" text properly
+    marginLeft: 20, // Reduced margin to fit both buttons
   },
   createAccountButtonText: {
     color: '#000000',
-    fontSize: 16,
+    fontSize: 15, // Slightly reduced font size for better fit
     fontWeight: '500',
     fontFamily: 'Montserrat-Medium',
   },
@@ -687,6 +692,9 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#D6D6D6',
+  },
+  lastCheckboxItem: {
+    borderBottomWidth: 0, // Remove border from last item
   },
   checkboxLabel: {
     fontSize: 15,
