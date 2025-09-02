@@ -8,10 +8,7 @@ import {
   TextInput,
   ScrollView,
 } from 'react-native';
-import CaretDownIcon from '../assets/icons/CaretDownIcon';
-import BackIcon from '../assets/icons/BackIcon';
-import AppleIcon from '../assets/icons/AppleIcon';
-import GoogleIcon from '../assets/icons/GoogleIcon';
+import { CaretDownIcon, BackIcon, AppleIcon, GoogleIcon } from '../assets/icons';
 
 const CreateAccountMobileNumber = ({ navigation }) => {
   const [isPhoneSelected, setIsPhoneSelected] = useState(true);
@@ -433,10 +430,10 @@ const CreateAccountMobileNumber = ({ navigation }) => {
         {/* Social Login Buttons */}
         <View style={styles.socialButtonsContainer}>
           <TouchableOpacity style={styles.socialButton} onPress={handleAppleLogin}>
-            <AppleIcon width={18} height={22} color="#332218" />
+            <AppleIcon width={42} height={42} color="#332218" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.socialButton} onPress={handleGoogleLogin}>
-            <GoogleIcon width={22} height={22} />
+            <GoogleIcon width={42} height={42} />
           </TouchableOpacity>
         </View>
 
@@ -675,11 +672,8 @@ const styles = StyleSheet.create({
   socialButton: {
     width: 42,
     height: 42,
-    borderRadius: 30,
+    borderRadius: 21,
     backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#332218',
-    opacity: 0.14,
     justifyContent: 'center',
     alignItems: 'center',
   },

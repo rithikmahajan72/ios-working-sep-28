@@ -70,84 +70,85 @@ const EnhancedLayout = () => {
   };
 
   const renderContent = () => {
-    switch (currentScreen) {
-      case 'Home':
-        return <HomeContent navigation={navigation} />;
-      case 'favourites':
-        return <FavouritesScreen navigation={navigation} />;
-      case 'FavouritesContent':
-        return <FavouritesContent navigation={navigation} />;
-      case 'FavouritesContentEditView':
-        return <FavouritesContentEditView navigation={navigation} />;
-      case 'FavouritesModalOverlayForSizeSelection':
-        return <FavouritesModalOverlayForSizeSelection navigation={navigation} route={{ params: routeParams }} />;
-      case 'FavouritesAddedToBagConfirmationModal':
-        return <FavouritesAddedToBagConfirmationModal navigation={navigation} route={{ params: routeParams }} />;
-      case 'FavouritesSizeChartReference':
-        return <FavouritesSizeChartReference navigation={navigation} route={{ params: routeParams }} />;
-      case 'Shop':
-        return <ShopContent navigation={navigation} />;
-      case 'Collection':
-        return <CollectionContent navigation={navigation} />;
-      case 'Filters':
-        return <FiltersScreen navigation={navigation} route={{ params: routeParams }} />;
-      case 'SearchScreen':
-        return <SearchScreen navigation={navigation} route={{ params: routeParams }} />;
-      case 'ScanBarcode':
-        return <ScanBarcodeFlow navigation={navigation} />;
-      case 'Rewards':
-        return <RewardsContent navigation={navigation} route={{ params: routeParams }} />;
-      case 'Profile':
-        return <ProfileContent navigation={navigation} />;
-      case 'Bag':
-        return <BagScreen navigation={navigation} />;
-      case 'CreateAccountMobileNumber':
-        return <CreateAccountMobileNumber navigation={navigation} />;
-      case 'CreateAccountEmail':
-        return <CreateAccountEmail navigation={navigation} />;
-      case 'CreateAccountEmailSuccessModal':
-        return <CreateAccountEmailSuccessModal navigation={navigation} />;
-      case 'CreateAccountMobileNumberVerification':
-        return <CreateAccountMobileNumberVerification navigation={navigation} />;
-      case 'CreateAccountMobileNumberAccountCreatedConfirmationModal':
-        return <CreateAccountMobileNumberAccountCreatedConfirmationModal navigation={navigation} />;
-      case 'LoginAccountMobileNumber':
-        return <LoginAccountMobileNumber navigation={navigation} />;
-      case 'LoginAccountEmail':
-        return <LoginAccountEmail navigation={navigation} />;
-      case 'ForgotLoginPassword':
-        return <ForgotLoginPassword navigation={navigation} />;
-      case 'ForgotLoginPasswordVerificationCode':
-        return <ForgotLoginPasswordVerificationCode navigation={navigation} route={{ params: routeParams }} />;
-      case 'forgotloginpqasswordcreatenewpasword':
-        return <ForgotLoginPasswordCreateNewPassword navigation={navigation} route={{ params: routeParams }} />;
-      case 'ForgotLoginPasswordConfirmationModal':
-        return <ForgotLoginPasswordConfirmationModal navigation={navigation} />;
-      case 'LoginAccountMobileNumberVerificationCode':
-        return <LoginAccountMobileNumberVerificationCode navigation={navigation} />;
-      case 'LoginAccountEmailVerificationCode':
-        return <LoginAccountEmailVerificationCode navigation={navigation} route={{ params: routeParams }} />;
-      case 'TermsAndConditions':
-        return <TermsAndConditions navigation={navigation} />;
-      case 'PreferenceSelector':
-        return <PreferenceSelector navigation={navigation} />;
-      case 'Orders':
-        return <OrdersScreen navigation={navigation} route={{ params: routeParams }} />;
-      case 'OrdersReturnExchange':
-        return <OrdersReturnExchange navigation={navigation} route={{ params: routeParams }} />;
-      case 'OrdersReturnRequest':
-        return <OrdersReturnRequest navigation={navigation} route={{ params: routeParams }} />;
-      case 'OrdersReturnAcceptedModal':
-        return <OrdersReturnAcceptedModal navigation={navigation} route={{ params: routeParams }} />;
-      case 'OrdersExchangeSizeSelectionChart':
-        return <OrdersExchangeSizeSelectionChart navigation={navigation} route={{ params: routeParams }} />;
-      case 'OrdersCancelOrder':
-        return <OrdersCancelOrderModal navigation={navigation} route={{ params: routeParams }} />;
-      case 'EditProfile':
-        return <EditProfile navigation={navigation} />;
-      case 'Settings':
-        return <SettingsScreen navigation={navigation} />;
-      case 'DeliveryAddressesSettings':
+    try {
+      switch (currentScreen) {
+        case 'Home':
+          return <HomeContent navigation={navigation} />;
+        case 'favourites':
+          return <FavouritesScreen navigation={navigation} />;
+        case 'FavouritesContent':
+          return <FavouritesContent navigation={navigation} />;
+        case 'FavouritesContentEditView':
+          return <FavouritesContentEditView navigation={navigation} />;
+        case 'FavouritesModalOverlayForSizeSelection':
+          return <FavouritesModalOverlayForSizeSelection navigation={navigation} route={{ params: routeParams }} />;
+        case 'FavouritesAddedToBagConfirmationModal':
+          return <FavouritesAddedToBagConfirmationModal navigation={navigation} route={{ params: routeParams }} />;
+        case 'FavouritesSizeChartReference':
+          return <FavouritesSizeChartReference navigation={navigation} route={{ params: routeParams }} />;
+        case 'Shop':
+          return <ShopContent navigation={navigation} />;
+        case 'Collection':
+          return <CollectionContent navigation={navigation} />;
+        case 'Filters':
+          return <FiltersScreen navigation={navigation} route={{ params: routeParams }} />;
+        case 'SearchScreen':
+          return <SearchScreen navigation={navigation} route={{ params: routeParams }} />;
+        case 'ScanBarcode':
+          return <ScanBarcodeFlow navigation={navigation} />;
+        case 'Rewards':
+          return <RewardsContent navigation={navigation} route={{ params: routeParams }} />;
+        case 'Profile':
+          return <ProfileContent navigation={navigation} />;
+        case 'Bag':
+          return <BagScreen navigation={navigation} />;
+        case 'CreateAccountMobileNumber':
+          return <CreateAccountMobileNumber navigation={navigation} />;
+        case 'CreateAccountEmail':
+          return <CreateAccountEmail navigation={navigation} />;
+        case 'CreateAccountEmailSuccessModal':
+          return <CreateAccountEmailSuccessModal navigation={navigation} />;
+        case 'CreateAccountMobileNumberVerification':
+          return <CreateAccountMobileNumberVerification navigation={navigation} />;
+        case 'CreateAccountMobileNumberAccountCreatedConfirmationModal':
+          return <CreateAccountMobileNumberAccountCreatedConfirmationModal navigation={navigation} />;
+        case 'LoginAccountMobileNumber':
+          return <LoginAccountMobileNumber navigation={navigation} />;
+        case 'LoginAccountEmail':
+          return <LoginAccountEmail navigation={navigation} />;
+        case 'ForgotLoginPassword':
+          return <ForgotLoginPassword navigation={navigation} />;
+        case 'ForgotLoginPasswordVerificationCode':
+          return <ForgotLoginPasswordVerificationCode navigation={navigation} route={{ params: routeParams }} />;
+        case 'forgotloginpqasswordcreatenewpasword':
+          return <ForgotLoginPasswordCreateNewPassword navigation={navigation} route={{ params: routeParams }} />;
+        case 'ForgotLoginPasswordConfirmationModal':
+          return <ForgotLoginPasswordConfirmationModal navigation={navigation} />;
+        case 'LoginAccountMobileNumberVerificationCode':
+          return <LoginAccountMobileNumberVerificationCode navigation={navigation} />;
+        case 'LoginAccountEmailVerificationCode':
+          return <LoginAccountEmailVerificationCode navigation={navigation} route={{ params: routeParams }} />;
+        case 'TermsAndConditions':
+          return <TermsAndConditions navigation={navigation} />;
+        case 'PreferenceSelector':
+          return <PreferenceSelector navigation={navigation} />;
+        case 'Orders':
+          return <OrdersScreen navigation={navigation} route={{ params: routeParams }} />;
+        case 'OrdersReturnExchange':
+          return <OrdersReturnExchange navigation={navigation} route={{ params: routeParams }} />;
+        case 'OrdersReturnRequest':
+          return <OrdersReturnRequest navigation={navigation} route={{ params: routeParams }} />;
+        case 'OrdersReturnAcceptedModal':
+          return <OrdersReturnAcceptedModal navigation={navigation} route={{ params: routeParams }} />;
+        case 'OrdersExchangeSizeSelectionChart':
+          return <OrdersExchangeSizeSelectionChart navigation={navigation} route={{ params: routeParams }} />;
+        case 'OrdersCancelOrder':
+          return <OrdersCancelOrderModal navigation={navigation} route={{ params: routeParams }} />;
+        case 'EditProfile':
+          return <EditProfile navigation={navigation} />;
+        case 'Settings':
+          return <SettingsScreen navigation={navigation} />;
+        case 'DeliveryAddressesSettings':
         return <DeliveryAddressesSettings navigation={navigation} />;
       case 'CommunicationPreferences':
         return <CommunicationPreferences navigation={navigation} />;
@@ -198,9 +199,19 @@ const EnhancedLayout = () => {
       case 'OrderConfirmationPhone':
         return <OrderConfirmationPhone navigation={navigation} route={{ params: routeParams }} />;
       case 'DeliveryOptionsStepFourIfCustomRequired':
-        return <DeliveryOptionsStepFourIfCustomRequired navigation={navigation} route={{ params: routeParams }} />;
-      default:
-        return <HomeContent />;
+          return <DeliveryOptionsStepFourIfCustomRequired navigation={navigation} route={{ params: routeParams }} />;
+        default:
+          return <HomeContent />;
+      }
+    } catch (error) {
+      console.error('Error rendering screen:', currentScreen, error);
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>
+            Screen failed to load. Please try again.
+          </Text>
+        </View>
+      );
     }
   };
 
@@ -261,6 +272,19 @@ const styles = StyleSheet.create({
   mainContent: {
     flex: 1,
     backgroundColor: Colors.backgroundSecondary,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    padding: Spacing.xl,
+  },
+  errorText: {
+    fontSize: FontSizes.lg,
+    color: Colors.textPrimary,
+    textAlign: 'center',
+    fontFamily: 'System',
   },
 });
 

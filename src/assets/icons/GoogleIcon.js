@@ -1,9 +1,9 @@
 import React from 'react';
-import Svg, { Path, G, Defs, ClipPath, Rect } from 'react-native-svg';
+import Svg, { Path, Rect, G } from 'react-native-svg';
 
-const GoogleIcon = ({ width = 22, height = 22 }) => (
-  <Svg width={width} height={height} viewBox="0 0 22 22" fill="none">
-    <G clipPath="url(#clip0_google)">
+const GoogleIcon = ({ width = 42, height = 42, color = '#332218' }) => (
+  <Svg width={width} height={height} viewBox="0 0 42 42" fill="none">
+    <G transform="translate(10, 10)">
       <Path 
         d="M4.82715 8.95125C5.25605 7.65366 6.08378 6.52466 7.19226 5.72531C8.30074 4.92597 9.63336 4.49711 11 4.49992C12.5492 4.49992 13.9498 5.04992 15.0498 5.95008L18.2508 2.75C16.3002 1.04958 13.8004 2.38419e-07 11 2.38419e-07C6.66415 2.38419e-07 2.93149 2.47317 1.13665 6.09583L4.82715 8.95125Z" 
         fill="#EA4335" 
@@ -21,11 +21,16 @@ const GoogleIcon = ({ width = 22, height = 22 }) => (
         fill="#FBBC05" 
       />
     </G>
-    <Defs>
-      <ClipPath id="clip0_google">
-        <Rect width="22" height="22" fill="white"/>
-      </ClipPath>
-    </Defs>
+    <Rect 
+      opacity="0.14" 
+      x="0.5" 
+      y="0.5" 
+      width="41" 
+      height="41" 
+      rx="20.5" 
+      fill="white" 
+      stroke={color}
+    />
   </Svg>
 );
 

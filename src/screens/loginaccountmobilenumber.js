@@ -9,6 +9,7 @@ import {
   ScrollView,
 } from 'react-native';
 import GlobalBackButton from '../components/GlobalBackButton';
+import { AppleIcon, GoogleIcon } from '../assets/icons';
 
 const LoginAccountMobileNumber = ({ navigation }) => {
   const [mobileNumber, setMobileNumber] = useState('');
@@ -161,14 +162,14 @@ const LoginAccountMobileNumber = ({ navigation }) => {
             style={styles.socialButton}
             onPress={() => handleSocialLogin('apple')}
           >
-            <Text style={styles.appleIcon}>🍎</Text>
+            <AppleIcon width={42} height={42} color="#332218" />
           </TouchableOpacity>
           
           <TouchableOpacity 
             style={styles.socialButton}
             onPress={() => handleSocialLogin('google')}
           >
-            <Text style={styles.googleIcon}>G</Text>
+            <GoogleIcon width={42} height={42} />
           </TouchableOpacity>
         </View>
 
@@ -356,22 +357,10 @@ const styles = StyleSheet.create({
   socialButton: {
     width: 42,
     height: 42,
-    borderRadius: 30,
+    borderRadius: 21,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#332218',
-    opacity: 0.14,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  appleIcon: {
-    fontSize: 18,
-    color: '#332218',
-  },
-  googleIcon: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#332218',
   },
   signupContainer: {
     flexDirection: 'row',

@@ -24,29 +24,57 @@ import ErrorBoundary from './src/components/ErrorBoundary';
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   const handleSplashFinish = () => {
-    setIsLoading(false);
+    try {
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error finishing splash:', error);
+      setHasError(true);
+    }
   };
+
+  // Add a fallback UI for critical errors
+  if (hasError) {
+    return (
+      <SafeAreaView style={styles.errorContainer}>
+        <Text style={styles.errorText}>
+          Something went wrong. Please restart the app.
+        </Text>
+      </SafeAreaView>
+    );
+  }
 
   if (isLoading) {
     return <SplashScreen onFinish={handleSplashFinish} />;
   }
 
-  return (
-    <ErrorBoundary>
-      <FavoritesProvider>
-        <View style={styles.container}>
-          <StatusBar
-            barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-            backgroundColor={Colors.background}
-            translucent={false}
-          />
-          <EnhancedLayout />
-        </View>
-      </FavoritesProvider>
-    </ErrorBoundary>
-  );
+  try {
+    return (
+      <ErrorBoundary>
+        <FavoritesProvider>
+          <View style={styles.container}>
+            <StatusBar
+              barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+              backgroundColor={Colors.background}
+              translucent={false}
+            />
+            <EnhancedLayout />
+          </View>
+        </FavoritesProvider>
+      </ErrorBoundary>
+    );
+  } catch (error) {
+    console.error('Critical error in App component:', error);
+    return (
+      <SafeAreaView style={styles.errorContainer}>
+        <Text style={styles.errorText}>
+          App failed to load. Please restart.
+        </Text>
+      </SafeAreaView>
+    );
+  }
 }
 
 // Alternative App Component with Manual Routing (if you prefer more control)
@@ -140,6 +168,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    fontFamily: 'System',
   },
 });export default App;
 export { AppWithManualRouting, AppWithRouter, Router };

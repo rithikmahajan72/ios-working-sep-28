@@ -16,6 +16,10 @@ export { default as CameraIcon } from './CameraIcon';
 export { default as ScanBarcodeIcon } from './ScanBarcodeIcon';
 export { default as CaretDownIcon } from './CaretDownIcon';
 
+// Social Login Icons
+export { default as AppleIcon } from './AppleIcon';
+export { default as GoogleIcon } from './GoogleIcon';
+
 // Payment Icons
 export { 
   VisaIcon,
