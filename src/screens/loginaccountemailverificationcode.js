@@ -23,7 +23,7 @@ const LoginAccountEmailVerificationCode = ({ navigation, route }) => {
     
     // Navigate to Terms and Conditions screen after successful email login verification
     if (navigation) {
-      navigation.navigate('TermsAndConditions');
+      navigation.navigate('TermsAndConditions', { previousScreen: 'LoginAccountEmailVerificationCode' });
     }
   };
 

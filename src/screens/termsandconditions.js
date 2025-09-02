@@ -9,9 +9,24 @@ import {
   Linking,
   Alert,
 } from 'react-native';
+import GlobalBackButton from '../components/GlobalBackButton';
 
-const TermsAndConditions = ({ navigation }) => {
+const TermsAndConditions = ({ navigation, route }) => {
   const [isAccepted, setIsAccepted] = useState(false);
+
+  const handleBackPress = () => {
+    // Check if we have previousScreen in route params
+    const previousScreen = route?.params?.previousScreen;
+    
+    if (previousScreen) {
+      // Navigate back to the specific previous screen
+      navigation.navigate(previousScreen);
+    } else {
+      // Default fallback navigation based on likely entry points
+      // TermsAndConditions is typically accessed from login verification screens
+      navigation.goBack();
+    }
+  };
 
   const handleRead = async () => {
     // Handle read terms and conditions - open external link
@@ -49,6 +64,12 @@ const TermsAndConditions = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header with Back Button */}
+      <View style={styles.header}>
+        <GlobalBackButton onPress={handleBackPress} />
+        <View style={styles.headerSpacer} />
+      </View>
+      
       <ScrollView 
         style={styles.scrollContainer} 
         showsVerticalScrollIndicator={false}
@@ -121,6 +142,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 24,
+    paddingBottom: 8,
+    backgroundColor: '#FFFFFF',
+  },
+  headerSpacer: {
+    flex: 1,
   },
   scrollContainer: {
     flex: 1,

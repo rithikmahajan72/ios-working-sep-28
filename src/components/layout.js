@@ -23,10 +23,17 @@ const EnhancedLayout = () => {
   const [currentScreen, setCurrentScreen] = useState('Home');
   const [headerTitle, setHeaderTitle] = useState('YORAA');
   const [routeParams, setRouteParams] = useState(null);
+  const [showPreferenceModal, setShowPreferenceModal] = useState(false);
 
   // Navigation context for handling screen navigation
   const navigation = {
     navigate: (screenName, params) => {
+      if (screenName === 'PreferenceSelector') {
+        // Handle PreferenceSelector as a modal
+        setShowPreferenceModal(true);
+        return;
+      }
+      
       if (['Home', 'Shop', 'Collection', 'Rewards', 'Profile'].includes(screenName)) {
         setActiveTab(screenName);
         setCurrentScreen(screenName);
@@ -133,9 +140,7 @@ const EnhancedLayout = () => {
         case 'LoginAccountEmailVerificationCode':
           return <LoginAccountEmailVerificationCode navigation={navigation} route={{ params: routeParams }} />;
         case 'TermsAndConditions':
-          return <TermsAndConditions navigation={navigation} />;
-        case 'PreferenceSelector':
-          return <PreferenceSelector navigation={navigation} />;
+          return <TermsAndConditions navigation={navigation} route={{ params: routeParams }} />;
         case 'Orders':
           return <OrdersScreen navigation={navigation} route={{ params: routeParams }} />;
         case 'OrdersReturnExchange':
@@ -224,6 +229,10 @@ const EnhancedLayout = () => {
   const shouldShowBottomNav = ['Home', 'Shop', 'Collection', 'Rewards', 'Profile'].includes(currentScreen);
   const shouldShowHeader = ['Profile'].includes(currentScreen);
 
+  const handleClosePreferenceModal = () => {
+    setShowPreferenceModal(false);
+  };
+
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeContainer}>
@@ -249,6 +258,13 @@ const EnhancedLayout = () => {
           onTabChange={handleTabChange}
         />
       )}
+
+      {/* PreferenceSelector Modal */}
+      <PreferenceSelector 
+        visible={showPreferenceModal}
+        navigation={navigation}
+        onClose={handleClosePreferenceModal}
+      />
     </View>
   );
 };

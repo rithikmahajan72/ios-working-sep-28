@@ -21,7 +21,7 @@ const LoginAccountMobileNumberVerificationCode = ({ navigation }) => {
     
     // Navigate to Terms and Conditions screen after successful login verification
     if (navigation) {
-      navigation.navigate('TermsAndConditions');
+      navigation.navigate('TermsAndConditions', { previousScreen: 'LoginAccountMobileNumberVerificationCode' });
     }
   };
 
