@@ -1,19 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   Modal,
   Animated,
   Dimensions,
-  SafeAreaView,
   ScrollView,
-  Image,
+  PanResponder,
 } from 'react-native';
-import { FontSizes, FontWeights, Spacing, BorderRadius } from '../constants';
 
-const { width, height } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 const SizeSelectionModal = ({
   visible,
@@ -24,8 +23,26 @@ const SizeSelectionModal = ({
   navigation
 }) => {
   const [activeTab, setActiveTab] = useState('sizeChart'); // 'sizeChart' or 'howToMeasure'
-  const translateY = useRef(new Animated.Value(height)).current;
   const [selectedSize, setSelectedSize] = useState(activeSize || 'M');
+  
+  // Single animated value for transform to avoid native driver conflicts
+  const translateY = useRef(new Animated.Value(height)).current;
+  
+  // Gesture handling state
+  const [isDragging, setIsDragging] = useState(false);
+  const backdropOpacity = useRef(new Animated.Value(0)).current;
+  
+  // Gesture state tracking
+  const gestureTracker = useRef({
+    isActive: false,
+    startY: 0,
+    currentY: 0,
+    velocity: 0,
+    lastTimestamp: 0,
+  }).current;
+
+  // Sheet dimensions and constraints
+  const DISMISS_THRESHOLD = 150;
 
   // Size data - matching Figma exactly (same values for both cm and in)
   const sizeData = [
@@ -45,27 +62,158 @@ const SizeSelectionModal = ({
       Animated.timing(translateY, {
         toValue: 0,
         duration: 250,
-        useNativeDriver: true,
+        useNativeDriver: false,
+      }).start();
+      
+      Animated.timing(backdropOpacity, {
+        toValue: 1,
+        duration: 250,
+        useNativeDriver: false,
       }).start();
     } else {
       // Animate out
+      Animated.parallel([
+        Animated.timing(translateY, {
+          toValue: height,
+          duration: 250,
+          useNativeDriver: false,
+        }),
+        Animated.timing(backdropOpacity, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: false,
+        }),
+      ]).start();
+    }
+  }, [visible, translateY, backdropOpacity]);
+
+  const handleClose = useCallback(() => {
+    Animated.parallel([
       Animated.timing(translateY, {
         toValue: height,
         duration: 250,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [visible]);
-
-  const handleClose = () => {
-    Animated.timing(translateY, {
-      toValue: height,
-      duration: 250,
-      useNativeDriver: true,
-    }).start(() => {
+        useNativeDriver: false,
+      }),
+      Animated.timing(backdropOpacity, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: false,
+      }),
+    ]).start(() => {
+      setIsDragging(false);
       onClose();
     });
-  };
+  }, [translateY, backdropOpacity, onClose]);
+
+  // Handle backdrop press
+  const handleBackdropPress = useCallback(() => {
+    if (navigation && navigation.goBack) {
+      navigation.goBack();
+    } else {
+      handleClose();
+    }
+  }, [navigation, handleClose]);
+
+  // Simple touch handlers as fallback
+  const handleTouchStart = useCallback((evt) => {
+    const startY = evt.nativeEvent.pageY;
+    gestureTracker.startY = startY;
+    gestureTracker.isActive = true;
+    console.log('Touch started at:', startY);
+  }, [gestureTracker]);
+
+  const handleTouchMove = useCallback((evt) => {
+    if (!gestureTracker.isActive) return;
+    
+    const currentY = evt.nativeEvent.pageY;
+    const deltaY = currentY - gestureTracker.startY;
+    
+    console.log('Touch move, delta:', deltaY);
+    
+    if (deltaY > 5) { // Only for downward movement
+      setIsDragging(true);
+      translateY.setValue(deltaY);
+      
+      // Update backdrop opacity
+      const dragProgress = Math.max(0, Math.min(1, deltaY / DISMISS_THRESHOLD));
+      const newBackdropOpacity = 1 - (dragProgress * 0.5);
+      backdropOpacity.setValue(newBackdropOpacity);
+    }
+  }, [gestureTracker, translateY, backdropOpacity, DISMISS_THRESHOLD]);
+
+  const handleTouchEnd = useCallback((evt) => {
+    if (!gestureTracker.isActive) return;
+    
+    const currentY = evt.nativeEvent.pageY;
+    const deltaY = currentY - gestureTracker.startY;
+    
+    console.log('Touch ended, delta:', deltaY);
+    
+    gestureTracker.isActive = false;
+    
+    if (deltaY > DISMISS_THRESHOLD) {
+      // Close the modal
+      handleClose();
+    } else {
+      // Snap back
+      Animated.spring(translateY, {
+        toValue: 0,
+        useNativeDriver: false,
+        tension: 100,
+        friction: 8,
+      }).start(() => {
+        setIsDragging(false);
+      });
+    }
+  }, [gestureTracker, DISMISS_THRESHOLD, handleClose, translateY]);
+
+  // Simple PanResponder for gesture control
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        const { dy } = gestureState;
+        return Math.abs(dy) > 2;
+      },
+      
+      onPanResponderGrant: () => {
+        console.log('Pan gesture started');
+        setIsDragging(true);
+      },
+      
+      onPanResponderMove: (evt, gestureState) => {
+        const { dy } = gestureState;
+        console.log('Pan gesture move, dy:', dy);
+        
+        if (dy > 0) {
+          translateY.setValue(dy);
+          
+          // Update backdrop opacity
+          const dragProgress = Math.max(0, Math.min(1, dy / DISMISS_THRESHOLD));
+          const newBackdropOpacity = 1 - (dragProgress * 0.5);
+          backdropOpacity.setValue(newBackdropOpacity);
+        }
+      },
+      
+      onPanResponderRelease: (evt, gestureState) => {
+        const { dy } = gestureState;
+        console.log('Pan gesture ended, dy:', dy);
+        
+        if (dy > DISMISS_THRESHOLD) {
+          handleClose();
+        } else {
+          Animated.spring(translateY, {
+            toValue: 0,
+            useNativeDriver: false,
+            tension: 100,
+            friction: 8,
+          }).start(() => {
+            setIsDragging(false);
+          });
+        }
+      },
+    })
+  ).current;
 
   const handleSizeSelect = (size) => {
     setSelectedSize(size);
@@ -213,59 +361,94 @@ const SizeSelectionModal = ({
       visible={visible}
       animationType="none"
       onRequestClose={handleClose}
+      statusBarTranslucent={true}
     >
       <View style={styles.modalOverlay}>
+        {/* Animated backdrop */}
+        <Animated.View style={[styles.backdrop, {
+          opacity: backdropOpacity.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 0.5],
+          }),
+        }]} />
+        
+        {/* Backdrop touchable */}
         <TouchableOpacity 
-          style={styles.backdrop}
+          style={styles.backdropTouchable}
           activeOpacity={1}
-          onPress={handleClose}
+          onPress={handleBackdropPress}
         />
         
-        <Animated.View 
-          style={[
-            styles.modalContainer,
-            {
-              transform: [{ translateY }]
-            }
-          ]}
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>SIZE SELECTION</Text>
-          </View>
-
-          {/* Tab Navigation */}
-          <View style={styles.tabNavigation}>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'sizeChart' && styles.activeTab]}
-              onPress={() => setActiveTab('sizeChart')}
+        {/* Bottom sheet with gesture handling */}
+        <TouchableWithoutFeedback>
+          <Animated.View 
+            style={[
+              styles.modalContainer,
+              {
+                transform: [{ translateY }]
+              }
+            ]}
+            {...panResponder.panHandlers}
+          >
+            {/* Draggable area for gesture detection */}
+            <View 
+              style={styles.dragArea}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
             >
-              <Text style={[styles.tabText, activeTab === 'sizeChart' && styles.activeTabText]}>
-                Size Chart
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'howToMeasure' && styles.activeTab]}
-              onPress={() => setActiveTab('howToMeasure')}
+              {/* Drag handle */}
+              <View style={styles.dragHandle} />
+            </View>
+            
+            {/* Header */}
+            <View style={styles.header}>
+              <Text style={styles.headerTitle}>SIZE SELECTION</Text>
+            </View>
+
+            {/* Tab Navigation */}
+            <View style={styles.tabNavigation}>
+              <TouchableOpacity
+                style={[styles.tab, activeTab === 'sizeChart' && styles.activeTab]}
+                onPress={() => setActiveTab('sizeChart')}
+                disabled={isDragging}
+              >
+                <Text style={[styles.tabText, activeTab === 'sizeChart' && styles.activeTabText]}>
+                  Size Chart
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.tab, activeTab === 'howToMeasure' && styles.activeTab]}
+                onPress={() => setActiveTab('howToMeasure')}
+                disabled={isDragging}
+              >
+                <Text style={[styles.tabText, activeTab === 'howToMeasure' && styles.activeTabText]}>
+                  How To Measure
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Content */}
+            <ScrollView 
+              style={styles.contentContainer} 
+              showsVerticalScrollIndicator={false}
+              scrollEnabled={!isDragging}
             >
-              <Text style={[styles.tabText, activeTab === 'howToMeasure' && styles.activeTabText]}>
-                How To Measure
-              </Text>
-            </TouchableOpacity>
-          </View>
+              {activeTab === 'sizeChart' ? renderSizeChart() : renderHowToMeasure()}
+            </ScrollView>
 
-          {/* Content */}
-          <ScrollView style={styles.contentContainer} showsVerticalScrollIndicator={false}>
-            {activeTab === 'sizeChart' ? renderSizeChart() : renderHowToMeasure()}
-          </ScrollView>
-
-          {/* Go to Bag Button */}
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.goToBagButton} onPress={handleGoToBag}>
-              <Text style={styles.goToBagText}>Go to Bag</Text>
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
+            {/* Go to Bag Button */}
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                style={[styles.goToBagButton, isDragging && styles.buttonDisabled]} 
+                onPress={handleGoToBag}
+                disabled={isDragging}
+              >
+                <Text style={styles.goToBagText}>Go to Bag</Text>
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        </TouchableWithoutFeedback>
       </View>
     </Modal>
   );
@@ -274,11 +457,32 @@ const SizeSelectionModal = ({
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
   backdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'black',
+  },
+  backdropTouchable: {
     flex: 1,
+  },
+  dragHandle: {
+    width: 50,
+    height: 5,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 2.5,
+    alignSelf: 'center',
+  },
+  dragArea: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 30,
   },
   modalContainer: {
     backgroundColor: '#FFFFFF',
@@ -288,10 +492,13 @@ const styles = StyleSheet.create({
     minHeight: height * 0.70,
     paddingBottom: 34, // Safe area bottom
   },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
   header: {
     alignItems: 'center',
-    marginTop: 29,
-    marginBottom: 33,
+    marginTop: 16,
+    marginBottom: 24,
   },
   headerTitle: {
     fontSize: 16,

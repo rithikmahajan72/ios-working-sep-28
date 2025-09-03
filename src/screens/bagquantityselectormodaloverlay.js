@@ -18,6 +18,7 @@ const BagQuantitySelectorModalOverlay = ({ visible, onClose, item, onQuantityCha
   const [isRemoveSelected, setIsRemoveSelected] = useState(false);
   const translateY = useRef(new Animated.Value(screenHeight)).current;
   const scrollViewRef = useRef(null);
+  const [scrollY, setScrollY] = useState(0);
 
   const quantities = [1, 2, 3, 4, 5];
   const options = ['Remove', ...quantities]; // Include Remove as first option
@@ -56,8 +57,8 @@ const BagQuantitySelectorModalOverlay = ({ visible, onClose, item, onQuantityCha
     });
   };
 
-  // Pan responder for swipe to dismiss
-  const panResponder = useRef(
+  // Pan responder for handle bar - always allows drag to close
+  const handleBarPanResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (evt, gestureState) => {
         return gestureState.dy > 10;
@@ -77,6 +78,54 @@ const BagQuantitySelectorModalOverlay = ({ visible, onClose, item, onQuantityCha
             tension: 100,
             friction: 8,
           }).start();
+        }
+      },
+    }),
+  ).current;
+
+  // Pan responder for swipe to dismiss from scroll view
+  const scrollPanResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Only capture gesture if we're scrolling down and scroll view is at top
+        return gestureState.dy > 10 && scrollY <= 0;
+      },
+      onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
+        // Capture the gesture when dragging down from the top
+        return gestureState.dy > 10 && scrollY <= 0;
+      },
+      onPanResponderGrant: () => {
+        // Disable scroll when pan responder takes control
+        if (scrollViewRef.current) {
+          scrollViewRef.current.setNativeProps({ scrollEnabled: false });
+        }
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        if (gestureState.dy > 0) {
+          translateY.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        // Re-enable scroll
+        if (scrollViewRef.current) {
+          scrollViewRef.current.setNativeProps({ scrollEnabled: true });
+        }
+        
+        if (gestureState.dy > 100 || gestureState.vy > 0.5) {
+          handleClose();
+        } else {
+          Animated.spring(translateY, {
+            toValue: 0,
+            useNativeDriver: true,
+            tension: 100,
+            friction: 8,
+          }).start();
+        }
+      },
+      onPanResponderTerminate: () => {
+        // Re-enable scroll if gesture is terminated
+        if (scrollViewRef.current) {
+          scrollViewRef.current.setNativeProps({ scrollEnabled: true });
         }
       },
     }),
@@ -151,10 +200,11 @@ const BagQuantitySelectorModalOverlay = ({ visible, onClose, item, onQuantityCha
               transform: [{ translateY }],
             },
           ]}
-          {...panResponder.panHandlers}
         >
           {/* Handle bar */}
-          <View style={styles.handleBar} />
+          <View style={styles.handleBarContainer} {...handleBarPanResponder.panHandlers}>
+            <View style={styles.handleBar} />
+          </View>
           
           {/* Quantity options */}
           <View style={styles.quantityContainer}>
@@ -166,6 +216,10 @@ const BagQuantitySelectorModalOverlay = ({ visible, onClose, item, onQuantityCha
               scrollEventThrottle={16}
               bounces={true}
               bouncesZoom={false}
+              onScroll={(event) => {
+                setScrollY(event.nativeEvent.contentOffset.y);
+              }}
+              {...scrollPanResponder.panHandlers}
             >
               {/* Add some padding at top */}
               <View style={styles.topPadding} />
@@ -203,14 +257,17 @@ const styles = StyleSheet.create({
     paddingBottom: 34, // Safe area bottom
     height: 372,
   },
+  handleBarContainer: {
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
   handleBar: {
     width: 40,
     height: 4,
     backgroundColor: '#767676',
     borderRadius: 30,
-    alignSelf: 'center',
-    marginTop: 14,
-    marginBottom: 20,
+    marginTop: 4,
+    marginBottom: 10,
   },
   quantityContainer: {
     flex: 1,

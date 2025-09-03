@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   ScrollView,
   Animated,
   Dimensions,
+  PanResponder,
 } from 'react-native';
 import { Colors } from '../constants/colors';
 import AddAddressModal from './deliveryoptionsstepthreeaddaddress';
@@ -19,6 +20,35 @@ const DeliveryOptionsStepTwoModal = ({ visible, onClose, selectedDeliveryOption,
   const [slideAnim] = useState(new Animated.Value(screenHeight));
   const [selectedAddress, setSelectedAddress] = useState('john-smith');
   const [showAddAddressModal, setShowAddAddressModal] = useState(false);
+
+  // Pan responder for drag to close
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Only respond to downward swipes
+        return gestureState.dy > 10 && Math.abs(gestureState.dx) < Math.abs(gestureState.dy);
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        if (gestureState.dy > 0) {
+          slideAnim.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dy > 100 || gestureState.vy > 0.5) {
+          // Close the modal if dragged down enough
+          handleClose();
+        } else {
+          // Snap back to original position
+          Animated.spring(slideAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+            tension: 100,
+            friction: 8,
+          }).start();
+        }
+      },
+    }),
+  ).current;
 
 
   useEffect(() => {
@@ -92,7 +122,11 @@ const DeliveryOptionsStepTwoModal = ({ visible, onClose, selectedDeliveryOption,
 
   return (
     <View style={styles.fullScreenOverlay}>
-      <View style={styles.backdrop} />
+      <TouchableOpacity 
+        style={styles.backdrop} 
+        activeOpacity={1} 
+        onPress={handleClose}
+      />
       <Animated.View
         style={[
           styles.modalContainer,
@@ -100,7 +134,13 @@ const DeliveryOptionsStepTwoModal = ({ visible, onClose, selectedDeliveryOption,
             transform: [{ translateY: slideAnim }],
           },
         ]}
+        {...panResponder.panHandlers}
       >
+        {/* Drag Handle */}
+        <View style={styles.dragHandleContainer}>
+          <View style={styles.dragHandle} />
+        </View>
+        
         <SafeAreaView style={styles.modalContent}>
           <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
 
@@ -217,6 +257,18 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     maxHeight: screenHeight * 0.9,
     minHeight: screenHeight * 0.5,
+  },
+  dragHandleContainer: {
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  dragHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#C7C7CC',
+    borderRadius: 2,
   },
   modalContent: {
     flex: 1,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   Animated,
 } from 'react-native';
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const BagSizeSelectorModalOverlay = ({ 
   visible, 
@@ -29,40 +29,98 @@ const BagSizeSelectorModalOverlay = ({
   // State for showing size chart
   const [showSizeChart, setShowSizeChart] = useState(false);
 
-  // Animation for swipe down
-  const translateY = new Animated.Value(0);
+  // Animation refs
+  const translateY = useRef(new Animated.Value(screenHeight)).current;
 
-  // Pan responder for swipe down gesture
-  const panResponder = PanResponder.create({
-    onMoveShouldSetPanResponder: (evt, gestureState) => {
-      // Only respond to downward swipes from the top part of the modal
-      return gestureState.dy > 0 && Math.abs(gestureState.dx) < Math.abs(gestureState.dy);
-    },
-    onPanResponderMove: (evt, gestureState) => {
-      if (gestureState.dy > 0) {
-        translateY.setValue(gestureState.dy);
-      }
-    },
-    onPanResponderRelease: (evt, gestureState) => {
-      if (gestureState.dy > 100) {
-        // If swiped down more than 100 pixels, close the modal
-        Animated.timing(translateY, {
-          toValue: 300,
-          duration: 200,
-          useNativeDriver: true,
-        }).start(() => {
-          translateY.setValue(0);
-          onClose();
-        });
-      } else {
-        // Snap back to original position
-        Animated.spring(translateY, {
-          toValue: 0,
-          useNativeDriver: true,
-        }).start();
-      }
-    },
-  });
+  useEffect(() => {
+    if (visible) {
+      // Animate modal up
+      Animated.spring(translateY, {
+        toValue: 0,
+        useNativeDriver: true,
+        tension: 100,
+        friction: 8,
+      }).start();
+    } else {
+      // Animate modal down
+      Animated.spring(translateY, {
+        toValue: screenHeight,
+        useNativeDriver: true,
+        tension: 100,
+        friction: 8,
+      }).start();
+    }
+  }, [visible, translateY]);
+
+  const handleClose = () => {
+    Animated.spring(translateY, {
+      toValue: screenHeight,
+      useNativeDriver: true,
+      tension: 100,
+      friction: 8,
+    }).start(() => {
+      onClose();
+    });
+  };
+
+  // Pan responder for drag handle - always allows drag to close
+  const dragHandlePanResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Always respond to any movement on the drag handle
+        return Math.abs(gestureState.dy) > 5;
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        if (gestureState.dy > 0) {
+          translateY.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dy > 50 || gestureState.vy > 0.3) {
+          // Lower threshold for drag handle
+          handleClose();
+        } else {
+          // Snap back to original position
+          Animated.spring(translateY, {
+            toValue: 0,
+            useNativeDriver: true,
+            tension: 100,
+            friction: 8,
+          }).start();
+        }
+      },
+    }),
+  ).current;
+
+  // Pan responder for content area - only for downward swipes
+  const contentPanResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Only respond to significant downward swipes
+        return gestureState.dy > 15 && Math.abs(gestureState.dx) < Math.abs(gestureState.dy);
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        if (gestureState.dy > 0) {
+          translateY.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dy > 100 || gestureState.vy > 0.5) {
+          // Higher threshold for content area
+          handleClose();
+        } else {
+          // Snap back to original position
+          Animated.spring(translateY, {
+            toValue: 0,
+            useNativeDriver: true,
+            tension: 100,
+            friction: 8,
+          }).start();
+        }
+      },
+    }),
+  ).current;
 
   const handleSizeSelect = (size) => {
     setSelectedSize(size);
@@ -96,22 +154,32 @@ const BagSizeSelectorModalOverlay = ({
     <Modal
       visible={visible}
       transparent={true}
-      animationType="slide"
-      onRequestClose={onClose}
+      animationType="none"
+      onRequestClose={handleClose}
     >
       <View style={styles.overlay}>
+        {/* Backdrop - touchable to close */}
+        <TouchableOpacity 
+          style={styles.backdrop} 
+          activeOpacity={1} 
+          onPress={handleClose}
+        />
+        
         <Animated.View 
           style={[
             styles.modalContainer,
-            { transform: [{ translateY }] }
+            { 
+              transform: [{ translateY }] 
+            }
           ]}
-          {...panResponder.panHandlers}
         >
-          {/* Drag Handle */}
-          <View style={styles.dragHandle} />
+          {/* Drag Handle - draggable area */}
+          <View style={styles.dragHandleContainer} {...dragHandlePanResponder.panHandlers}>
+            <View style={styles.dragHandle} />
+          </View>
           
           {!showSizeChart ? (
-            <>
+            <View style={styles.contentContainer} {...contentPanResponder.panHandlers}>
               {/* Size Options */}
               <View style={styles.sizeGrid}>
                 {availableSizes.map((size) => (
@@ -145,21 +213,12 @@ const BagSizeSelectorModalOverlay = ({
               <TouchableOpacity style={styles.doneButton} onPress={handleDone}>
                 <Text style={styles.doneButtonText}>Done</Text>
               </TouchableOpacity>
-            </>
+            </View>
           ) : (
-            <>
+            <View style={styles.contentContainer} {...contentPanResponder.panHandlers}>
               {/* Size Chart Content */}
-              <Text style={styles.headerTitle}>SIZE CHART</Text>
-              <View style={styles.sizeChartContent}>
-                <Text style={styles.sizeChartText}>Size chart content goes here...</Text>
-                <TouchableOpacity 
-                  style={styles.doneButton} 
-                  onPress={() => setShowSizeChart(false)}
-                >
-                  <Text style={styles.doneButtonText}>Back to Size Selection</Text>
-                </TouchableOpacity>
-              </View>
-            </>
+              <Text style={styles.sizeChartTitle}>Size Chart</Text>
+            </View>
           )}
         </Animated.View>
       </View>
@@ -173,22 +232,31 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
+  backdrop: {
+    flex: 1,
+  },
   modalContainer: {
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingHorizontal: 24,
-    paddingTop: 16,
     paddingBottom: 40,
     minHeight: 320,
   },
+  dragHandleContainer: {
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
   dragHandle: {
-    width: 36,
+    width: 40,
     height: 4,
-    backgroundColor: '#D9D9D9',
+    backgroundColor: '#C7C7CC',
     borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 32,
+  },
+  contentContainer: {
+    flex: 1,
   },
   sizeGrid: {
     flexDirection: 'row',
