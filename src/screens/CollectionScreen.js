@@ -15,6 +15,7 @@ import {
 import { FontSizes, FontWeights, Spacing, BorderRadius } from '../constants';
 import { GlobalSearchIcon, FilterIcon, GlobalCartIcon, HeartIcon } from '../assets/icons';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { useBag } from '../contexts/BagContext';
 import { PRODUCTS } from '../constants/products';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -218,6 +219,9 @@ const CollectionScreen = ({ navigation }) => {
   // Use the FavoritesContext
   const { toggleFavorite, isFavorite } = useFavorites();
 
+  // Use the BagContext
+  const { addToBag } = useBag();
+
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
   const filteredProducts = PRODUCTS.filter(product => 
@@ -232,6 +236,17 @@ const CollectionScreen = ({ navigation }) => {
     } else {
       console.log('Removed from favorites');
     }
+  };
+
+  const handleAddToBag = (product) => {
+    // For now, add with default size. In a real app, you might want to show a size selector
+    const productToAdd = {
+      ...product,
+      size: 'M', // Default size - could be made configurable
+    };
+    
+    addToBag(productToAdd);
+    console.log('Added to bag! Check your Bag to see all items.');
   };
 
   const openFilterModal = () => {
@@ -283,7 +298,7 @@ const CollectionScreen = ({ navigation }) => {
           style={styles.cartButton}
           onPress={(e) => {
             e.stopPropagation();
-            // Handle cart action here if needed
+            handleAddToBag(item);
           }}
         >
           <GlobalCartIcon size={16} />

@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Modal,
+  Animated,
+  Dimensions,
+  PanResponder,
 } from 'react-native';
 import { Colors, FontFamilies } from '../constants';
 
 const FavouritesAddedToBagConfirmationModal = ({ navigation }) => {
+  const { height: screenHeight } = Dimensions.get('window');
+  const translateY = useRef(new Animated.Value(0)).current;
+  const panY = useRef(0);
 
   const handleViewBag = () => {
     // Navigate to bag screen and close all modals
@@ -20,6 +26,57 @@ const FavouritesAddedToBagConfirmationModal = ({ navigation }) => {
     navigation.navigate('favourites');
   };
 
+  const closeModalAnimation = () => {
+    Animated.timing(translateY, {
+      toValue: screenHeight,
+      duration: 250, // Faster animation - reduced from 300ms
+      useNativeDriver: true,
+    }).start(() => {
+      handleClose();
+    });
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Respond to any vertical movement greater than 2px
+        const { dy } = gestureState;
+        return Math.abs(dy) > 2;
+      },
+      onPanResponderGrant: (evt) => {
+        panY.current = 0;
+        // Stop any ongoing animations
+        translateY.stopAnimation();
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        const { dy } = gestureState;
+        panY.current = dy;
+        
+        // Only allow downward movement
+        if (dy > 0) {
+          translateY.setValue(dy);
+        }
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        const { dy, vy } = gestureState;
+        
+        // More sensitive thresholds: Close if dragged down more than 50px or with velocity > 0.3
+        if (dy > 50 || vy > 0.3) {
+          closeModalAnimation();
+        } else {
+          // Snap back to original position with faster animation
+          Animated.spring(translateY, {
+            toValue: 0,
+            useNativeDriver: true,
+            tension: 100,
+            friction: 8,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
   return (
     <Modal
       visible={true}
@@ -30,13 +87,23 @@ const FavouritesAddedToBagConfirmationModal = ({ navigation }) => {
       <View style={styles.overlay}>
         <TouchableOpacity 
           style={styles.overlayBackground} 
-          onPress={handleClose}
+          onPress={closeModalAnimation}
           activeOpacity={1}
         />
         
-        <View style={styles.modalContainer}>
-          {/* Drawer Handle */}
-          <View style={styles.drawerHandle} />
+        <Animated.View 
+          style={[
+            styles.modalContainer,
+            {
+              transform: [{ translateY }],
+            },
+          ]}
+          {...panResponder.panHandlers}
+        >
+          {/* Drawer Handle - Enhanced for better touch target */}
+          <View style={styles.drawerHandleContainer}>
+            <View style={styles.drawerHandle} />
+          </View>
           
           {/* Success Icon */}
           <View style={styles.successIconContainer}>
@@ -61,7 +128,7 @@ const FavouritesAddedToBagConfirmationModal = ({ navigation }) => {
           >
             <Text style={styles.viewBagButtonText}>View Bag</Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -86,14 +153,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 22,
   },
+  drawerHandleContainer: {
+    width: '100%',
+    height: 40, // Increased from 20 to 40 for better touch target
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    top: 0,
+    zIndex: 1,
+  },
   drawerHandle: {
     width: 64,
     height: 6,
     backgroundColor: '#E6E6E6',
     borderRadius: 40,
-    position: 'absolute',
-    top: 8,
-    alignSelf: 'center',
+    marginTop: 12, // Increased margin to center better in larger container
   },
   successIconContainer: {
     alignItems: 'center',

@@ -12,11 +12,11 @@ import { GlobalBackButton } from '../components';
 import ModalExchange from './ordersexchangethankyoumodal';
 
 const sizes = [
-  { id: 'S', name: 'S', waist: '71.1', inseam: '70.1' },
-  { id: 'M', name: 'M', waist: '71.1', inseam: '70.1' },
-  { id: 'L', name: 'L', waist: '71.1', inseam: '70.1' },
-  { id: 'XL', name: 'XL', waist: '71.1', inseam: '70.1' },
-  { id: 'XXL', name: 'XXL', waist: '71.1', inseam: '70.1' },
+  { id: 'S', name: 'S', waist: '71.1', inseam: '70.1', available: false },
+  { id: 'M', name: 'M', waist: '71.1', inseam: '70.1', available: true },
+  { id: 'L', name: 'L', waist: '71.1', inseam: '70.1', available: true },
+  { id: 'XL', name: 'XL', waist: '71.1', inseam: '70.1', available: true },
+  { id: 'XXL', name: 'XXL', waist: '71.1', inseam: '70.1', available: true },
 ];
 
 const OrdersExchangeSizeSelectionChart = ({ navigation, route }) => {
@@ -26,6 +26,12 @@ const OrdersExchangeSizeSelectionChart = ({ navigation, route }) => {
   const modalExchangeRef = useRef(null);
 
   const handleSizeSelect = (sizeId) => {
+    // Find the size to check if it's available
+    const size = sizes.find(s => s.id === sizeId);
+    if (size && !size.available) {
+      // Don't allow selection of unavailable sizes
+      return;
+    }
     setSelectedSize(sizeId);
   };
 
@@ -41,27 +47,54 @@ const OrdersExchangeSizeSelectionChart = ({ navigation, route }) => {
 
   const renderSizeRow = (size, index) => {
     const isSelected = selectedSize === size.id;
-    const isEven = index % 2 === 0;
-    const backgroundColor = isEven ? '#EDEDED' : '#FFFFFF';
+    const isAvailable = size.available;
+    
+    // Determine background color based on availability
+    const backgroundColor = !isAvailable ? '#EDEDED' : '#FFFFFF';
     
     return (
       <TouchableOpacity
         key={size.id}
         style={[
           styles.sizeRow,
-          { backgroundColor }
+          { backgroundColor },
+          index > 0 && styles.sizeRowBorder // Add border to all rows except first
         ]}
         onPress={() => handleSizeSelect(size.id)}
-        activeOpacity={0.7}
+        activeOpacity={isAvailable ? 0.7 : 1}
+        disabled={!isAvailable}
       >
         <View style={styles.radioContainer}>
-          <View style={[styles.radioButton, isSelected && styles.radioButtonSelected]}>
+          <View style={[
+            styles.radioButton, 
+            isSelected && styles.radioButtonSelected,
+            !isAvailable && styles.radioButtonUnavailable
+          ]}>
             {isSelected && <View style={styles.radioButtonInner} />}
           </View>
         </View>
-        <Text style={[styles.sizeText, isSelected && styles.selectedText]}>{size.name}</Text>
-        <Text style={[styles.measurementText, isSelected && styles.selectedText]}>{size.waist}</Text>
-        <Text style={[styles.measurementText, isSelected && styles.selectedText, styles.centerText]}>{size.inseam}</Text>
+        <Text style={[
+          styles.sizeText, 
+          isSelected && styles.selectedText,
+          !isAvailable && styles.unavailableText
+        ]}>
+          {size.name}
+        </Text>
+        <Text style={[
+          styles.measurementText, 
+          isSelected && styles.selectedText,
+          !isAvailable && styles.unavailableText
+        ]}>
+          {size.waist}
+        </Text>
+        <Text style={[
+          styles.measurementText, 
+          isSelected && styles.selectedText,
+          !isAvailable && styles.unavailableText,
+          styles.centerText
+        ]}>
+          {size.inseam}
+        </Text>
       </TouchableOpacity>
     );
   };
@@ -303,6 +336,10 @@ const styles = StyleSheet.create({
     height: 45,
     paddingHorizontal: 16,
   },
+  sizeRowBorder: {
+    borderTopWidth: 1,
+    borderTopColor: '#F2F2F2',
+  },
   radioContainer: {
     width: 30,
     alignItems: 'flex-start',
@@ -312,12 +349,15 @@ const styles = StyleSheet.create({
     height: 13,
     borderRadius: 6.5,
     borderWidth: 1,
-    borderColor: '#848688',
+    borderColor: '#000000',
     justifyContent: 'center',
     alignItems: 'center',
   },
   radioButtonSelected: {
     borderColor: '#000000',
+  },
+  radioButtonUnavailable: {
+    borderColor: '#848688',
   },
   radioButtonInner: {
     width: 7,
@@ -328,14 +368,14 @@ const styles = StyleSheet.create({
   sizeText: {
     fontSize: 16,
     fontWeight: '400',
-    color: '#848688',
+    color: '#000000',
     fontFamily: 'Montserrat-Regular',
     flex: 1,
   },
   measurementText: {
     fontSize: 16,
     fontWeight: '400',
-    color: '#848688',
+    color: '#000000',
     fontFamily: 'Montserrat-Regular',
     flex: 1,
   },
@@ -344,6 +384,9 @@ const styles = StyleSheet.create({
   },
   selectedText: {
     color: '#000000',
+  },
+  unavailableText: {
+    color: '#848688',
   },
   howToMeasureContainer: {
     padding: 20,

@@ -19,6 +19,7 @@ import { EnhancedLayout } from './src/components/layout';
 import SplashScreen from './src/components/SplashScreen';
 import { Colors } from './src/constants';
 import { FavoritesProvider } from './src/contexts/FavoritesContext';
+import { BagProvider } from './src/contexts/BagContext';
 import ErrorBoundary from './src/components/ErrorBoundary';
 
 // Main App Component with Routing
@@ -56,14 +57,16 @@ function App() {
       <GestureHandlerRootView style={styles.container}>
         <ErrorBoundary>
           <FavoritesProvider>
-            <View style={styles.container}>
-              <StatusBar
-                barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-                backgroundColor={Colors.background}
-                translucent={false}
-              />
-              <EnhancedLayout />
-            </View>
+            <BagProvider>
+              <View style={styles.container}>
+                <StatusBar
+                  barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+                  backgroundColor={Colors.background}
+                  translucent={false}
+                />
+                <EnhancedLayout />
+              </View>
+            </BagProvider>
           </FavoritesProvider>
         </ErrorBoundary>
       </GestureHandlerRootView>

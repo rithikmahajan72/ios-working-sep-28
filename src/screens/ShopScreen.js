@@ -38,6 +38,8 @@ const HeartIcon = ({ filled = false, color = '#000000' }) => (
 
 // Import GlobalCartIcon from assets
 import { GlobalCartIcon } from '../assets/icons';
+import { useFavorites } from '../contexts/FavoritesContext';
+import { useBag } from '../contexts/BagContext';
 
 // Sample data for new arrivals and trending now
 const NEW_ARRIVALS = [
@@ -102,7 +104,10 @@ const TABS = ['Men', 'Women', 'Kids'];
 
 const ShopScreen = React.memo(({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('Men');
-  const [favorites, setFavorites] = useState(new Set());
+
+  // Use contexts instead of local state
+  const { toggleFavorite, isFavorite } = useFavorites();
+  const { addToBag } = useBag();
 
   // Memoize static data arrays to prevent recreation on each render
   const newArrivals = useMemo(() => NEW_ARRIVALS, []);
@@ -119,17 +124,16 @@ const ShopScreen = React.memo(({ navigation }) => {
     setSelectedTab(tab);
   }, []);
 
-  const toggleFavorite = useCallback((productId) => {
-    setFavorites(prevFavorites => {
-      const newFavorites = new Set(prevFavorites);
-      if (newFavorites.has(productId)) {
-        newFavorites.delete(productId);
-      } else {
-        newFavorites.add(productId);
-      }
-      return newFavorites;
-    });
-  }, []);
+  const handleAddToBag = useCallback((product) => {
+    // For now, add with default size. In a real app, you might want to show a size selector
+    const productToAdd = {
+      ...product,
+      size: 'M', // Default size - could be made configurable
+    };
+    
+    addToBag(productToAdd);
+    console.log('Added to bag! Check your Bag to see all items.');
+  }, [addToBag]);
 
   // Memoized render functions for better performance
   const renderProductItem = useCallback(({ item }) => (
@@ -149,13 +153,14 @@ const ShopScreen = React.memo(({ navigation }) => {
           style={styles.favoriteButton}
           onPress={() => toggleFavorite(item.id)}
           accessibilityRole="button"
-          accessibilityLabel={favorites.has(item.id) ? "Remove from favorites" : "Add to favorites"}
-          accessibilityState={{ selected: favorites.has(item.id) }}
+          accessibilityLabel={isFavorite(item.id) ? "Remove from favorites" : "Add to favorites"}
+          accessibilityState={{ selected: isFavorite(item.id) }}
         >
-          <HeartIcon filled={favorites.has(item.id)} />
+          <HeartIcon filled={isFavorite(item.id)} />
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.cartButton}
+          onPress={() => handleAddToBag(item)}
           accessibilityRole="button"
           accessibilityLabel="Add to cart"
           accessibilityHint="Add product to shopping cart"
@@ -168,7 +173,7 @@ const ShopScreen = React.memo(({ navigation }) => {
         <Text style={styles.productPrice}>{item.price}</Text>
       </View>
     </TouchableOpacity>
-  ), [favorites, toggleFavorite]);
+  ), [toggleFavorite, isFavorite, handleAddToBag]);
 
   const renderSaleCategoryItem = useCallback(({ item }) => (
     <TouchableOpacity 

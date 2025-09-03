@@ -7,6 +7,7 @@ import {
   Animated,
   Modal,
 } from 'react-native';
+import Svg, { G, Path, Circle } from 'react-native-svg';
 
 const OrdersReturnAcceptedModal = ({ navigation, route }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -71,13 +72,24 @@ const OrdersReturnAcceptedModal = ({ navigation, route }) => {
             {/* Success Icon */}
             <View style={styles.iconContainer}>
               <View style={styles.iconBackground}>
-                <View style={styles.icon}>
-                  {/* Checkmark icon */}
-                  <View style={styles.checkmark}>
-                    <View style={styles.checkmarkStem} />
-                    <View style={styles.checkmarkKick} />
-                  </View>
-                </View>
+                <Svg width={54} height={54} viewBox="0 0 54 54" fill="none">
+                  <G id="Check">
+                    {/* Main green circle */}
+                    <Circle
+                      cx="27"
+                      cy="27"
+                      r="27"
+                      fill="#508A7B"
+                    />
+                    {/* White checkmark */}
+                    <Path
+                      clipRule="evenodd"
+                      d="M40.7878 17.54C41.4008 18.1546 41.4008 19.1512 40.7878 19.7648L23.5258 37.0732C22.9128 37.6878 21.9198 37.6878 21.3068 37.0732L13.4597 29.2056C12.8468 28.591 12.8468 27.5953 13.4597 26.9807C14.0727 26.3661 15.0668 26.3661 15.6788 26.9807L22.4157 33.7355L38.5688 17.54C39.1818 16.9253 40.1758 16.9253 40.7878 17.54Z"
+                      fill="white"
+                      fillRule="evenodd"
+                    />
+                  </G>
+                </Svg>
               </View>
             </View>
 
@@ -137,39 +149,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(80, 138, 123, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  icon: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    backgroundColor: '#508A7B',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkmark: {
-    width: 24,
-    height: 18,
-    position: 'relative',
-  },
-  checkmarkStem: {
-    position: 'absolute',
-    width: 3,
-    height: 9,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 1.5,
-    right: 6,
-    bottom: 6,
-    transform: [{ rotate: '45deg' }],
-  },
-  checkmarkKick: {
-    position: 'absolute',
-    width: 3,
-    height: 5,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 1.5,
-    right: 13,
-    bottom: 8,
-    transform: [{ rotate: '-45deg' }],
   },
   contentContainer: {
     alignItems: 'center',

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,9 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
+  PanResponder,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import { Colors, FontFamilies } from '../constants';
 
@@ -13,6 +16,47 @@ const FavouritesModalOverlayForSizeSelection = ({ route, navigation }) => {
   const { product } = route.params || {};
   const [selectedSize, setSelectedSize] = useState('4');
   const [selectedSizeType, setSizeType] = useState('L (W 10-13 / M 8-12)');
+  
+  // Animation values for gesture handling
+  const translateY = useRef(new Animated.Value(0)).current;
+  const screenHeight = Dimensions.get('window').height;
+  
+  // Pan responder for swipe down gesture
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Only respond to vertical swipes starting from the top 100px of the modal
+        const { dy, y0 } = gestureState;
+        const modalTop = screenHeight * 0.4; // Approximate modal top position
+        return Math.abs(dy) > 10 && dy > 0 && y0 < modalTop + 100;
+      },
+      onPanResponderGrant: () => {
+        translateY.setOffset(translateY._value);
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        // Only allow downward movement
+        if (gestureState.dy >= 0) {
+          translateY.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        translateY.flattenOffset();
+        
+        // If dragged down more than 100px or with sufficient velocity, close modal
+        if (gestureState.dy > 100 || gestureState.vy > 0.5) {
+          closeModalWithAnimation();
+        } else {
+          // Snap back to original position
+          Animated.spring(translateY, {
+            toValue: 0,
+            useNativeDriver: true,
+            tension: 100,
+            friction: 8,
+          }).start();
+        }
+      },
+    })
+  ).current;
 
   // Size options for the first row (shoe sizes)
   const sizeOptions = [
@@ -62,6 +106,21 @@ const FavouritesModalOverlayForSizeSelection = ({ route, navigation }) => {
 
   const handleClose = () => {
     navigation.goBack();
+  };
+
+  const closeModalWithAnimation = () => {
+    Animated.timing(translateY, {
+      toValue: screenHeight,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      navigation.goBack();
+    });
+  };
+
+  // Handle backdrop press
+  const handleBackdropPress = () => {
+    closeModalWithAnimation();
   };
 
   const renderSizeOption = (option) => {
@@ -126,13 +185,26 @@ const FavouritesModalOverlayForSizeSelection = ({ route, navigation }) => {
       <View style={styles.overlay}>
         <TouchableOpacity 
           style={styles.overlayBackground} 
-          onPress={handleClose}
+          onPress={handleBackdropPress}
           activeOpacity={1}
         />
         
-        <View style={styles.modalContainer}>
-          {/* Drawer Handle */}
-          <View style={styles.drawerHandle} />
+        <Animated.View 
+          style={[
+            styles.modalContainer,
+            {
+              transform: [{ translateY }],
+            },
+          ]}
+          {...panResponder.panHandlers}
+        >
+          {/* Drawer Handle - Enhanced for drag gesture */}
+          <TouchableOpacity 
+            style={styles.drawerHandleContainer}
+            activeOpacity={0.8}
+          >
+            <View style={styles.drawerHandle} />
+          </TouchableOpacity>
           
           {/* Product Section */}
           <View style={styles.productSection}>
@@ -189,7 +261,7 @@ const FavouritesModalOverlayForSizeSelection = ({ route, navigation }) => {
           >
             <Text style={styles.addToBagButtonText}>Add to Bag</Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -211,14 +283,16 @@ const styles = StyleSheet.create({
     paddingBottom: 34,
     minHeight: 552,
   },
+  drawerHandleContainer: {
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   drawerHandle: {
     width: 64,
     height: 6,
     backgroundColor: '#E6E6E6',
     borderRadius: 40,
-    alignSelf: 'center',
-    marginTop: 8,
-    marginBottom: 16,
   },
   productSection: {
     flexDirection: 'row',

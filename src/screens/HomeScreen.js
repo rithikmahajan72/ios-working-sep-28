@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import GlobalSearchIcon from '../assets/icons/GlobalSearchIcon';
 import NewIcon from '../assets/icons/NewIcon';
-import LockIcon from '../assets/icons/LockIcon';
+import ShoppingBagIcon from '../assets/icons/ShoppingBagIcon';
 import EYXIcon from '../assets/icons/EYXIcon';
 import RightArrowIcon from '../assets/icons/RightArrowIcon';
 
@@ -39,7 +39,7 @@ const HomeScreen = React.memo(({ navigation }) => {
 
   const handleNavigateToBag = useCallback(() => {
     console.log('Attempting to navigate to Bag screen');
-    navigation?.navigate('Bag', { previousScreen: 'Home' });
+    navigation?.navigate('bagemptyscreen', { previousScreen: 'Home' });
   }, [navigation]);
 
   const handleNavigateToProduct = useCallback(() => {
@@ -103,7 +103,7 @@ const HomeScreen = React.memo(({ navigation }) => {
             accessibilityLabel="Shopping bag"
             accessibilityHint="Navigate to shopping bag"
           >
-            <LockIcon size={24} color="#000000" />
+            <ShoppingBagIcon size={24} color="#000000" />
           </TouchableOpacity>
         </View>
       </View>

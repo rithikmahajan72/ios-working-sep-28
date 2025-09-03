@@ -7,6 +7,7 @@ import {
   Animated,
   Dimensions,
   Modal,
+  PanResponder,
 } from 'react-native';
 
 const { height } = Dimensions.get('window');
@@ -40,6 +41,65 @@ const OrdersReturnRequest = ({ navigation, route }) => {
     navigation.navigate('OrdersReturnAcceptedModal');
   };
 
+  // Pan responder for drag handle - always allows drag to close
+  const dragHandlePanResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Always respond to any movement on the drag handle
+        return Math.abs(gestureState.dy) > 5;
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        if (gestureState.dy > 0) {
+          slideAnim.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dy > 50 || gestureState.vy > 0.3) {
+          // Lower threshold for drag handle - close modal
+          handleGoBack();
+        } else {
+          // Snap back to original position
+          Animated.spring(slideAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+            tension: 100,
+            friction: 8,
+          }).start();
+        }
+      },
+    }),
+  ).current;
+
+  // Pan responder for content area - only for downward swipes
+  const contentPanResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Only respond to significant downward swipes
+        return gestureState.dy > 15 && Math.abs(gestureState.dx) < Math.abs(gestureState.dy);
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        if (gestureState.dy > 0) {
+          slideAnim.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dy > 100 || gestureState.vy > 0.5) {
+          // Higher threshold for content area - close modal
+          handleGoBack();
+        } else {
+          // Snap back to original position
+          Animated.spring(slideAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+            tension: 100,
+            friction: 8,
+          }).start();
+        }
+      },
+    }),
+  ).current;
+
   return (
     <Modal
       visible={true}
@@ -48,6 +108,13 @@ const OrdersReturnRequest = ({ navigation, route }) => {
       onRequestClose={handleGoBack}
     >
       <View style={styles.overlay}>
+        {/* Backdrop - tap to close */}
+        <TouchableOpacity 
+          style={styles.backdrop}
+          activeOpacity={1}
+          onPress={handleGoBack}
+        />
+        
         <Animated.View 
           style={[
             styles.modalContainer,
@@ -56,32 +123,43 @@ const OrdersReturnRequest = ({ navigation, route }) => {
             }
           ]}
         >
-          {/* Drawer Handle */}
-          <View style={styles.drawerHandle} />
+          {/* Drawer Handle - draggable area */}
+          <View 
+            style={styles.drawerHandleContainer}
+            {...dragHandlePanResponder.panHandlers}
+          >
+            <View style={styles.drawerHandle} />
+          </View>
           
-          {/* Warning Icon */}
-          <View style={styles.iconContainer}>
-            <View style={styles.iconBackground}>
-              <View style={styles.icon}>
-                {/* Exclamation mark icon */}
-                <View style={styles.exclamationLine} />
-                <View style={styles.exclamationDot} />
+          {/* Content Container with swipe down capability */}
+          <View 
+            style={styles.contentWrapper}
+            {...contentPanResponder.panHandlers}
+          >
+            {/* Warning Icon */}
+            <View style={styles.iconContainer}>
+              <View style={styles.iconBackground}>
+                <View style={styles.icon}>
+                  {/* Exclamation mark icon */}
+                  <View style={styles.exclamationLine} />
+                  <View style={styles.exclamationDot} />
+                </View>
               </View>
+            </View>
+
+            {/* Content Container */}
+            <View style={styles.contentContainer}>
+              {/* Title */}
+              <Text style={styles.title}>Requesting return!</Text>
+              
+              {/* Description */}
+              <Text style={styles.description}>
+                Please note that Rs. 200 reverse shipment charges for India and Rs.1300 for International are applicable. Charges vary for International Delivery. Please read our return and exchange policies before proceeding.
+              </Text>
             </View>
           </View>
 
-          {/* Content Container */}
-          <View style={styles.contentContainer}>
-            {/* Title */}
-            <Text style={styles.title}>Requesting return!</Text>
-            
-            {/* Description */}
-            <Text style={styles.description}>
-              Please note that Rs. 200 reverse shipment charges for India and Rs.1300 for International are applicable. Charges vary for International Delivery. Please read our return and exchange policies before proceeding.
-            </Text>
-          </View>
-
-          {/* Button Container */}
+          {/* Button Container - separate from content pan responder */}
           <View style={styles.buttonContainer}>
             {/* Go Back Button */}
             <TouchableOpacity
@@ -113,6 +191,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
+  backdrop: {
+    flex: 1,
+  },
   modalContainer: {
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 10,
@@ -127,8 +208,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#E6E6E6',
     borderRadius: 40,
     alignSelf: 'center',
-    marginTop: 10,
-    marginBottom: 20,
+  },
+  drawerHandleContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+    paddingTop: 10,
+  },
+  contentWrapper: {
+    paddingTop: 20,
   },
   iconContainer: {
     alignItems: 'center',

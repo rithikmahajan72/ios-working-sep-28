@@ -17,6 +17,7 @@ import BagQuantitySelectorModalOverlay from './bagquantityselectormodaloverlay';
 import BagSizeSelectorModalOverlay from './bagsizeselectormodaloverlay';
 import BagSizeSelectorSizeChart from './bagsizeselectorsizechart';
 import DeliveryOptionsStepTwoModal from './deliveryoptionsteptwo';
+import { useBag } from '../contexts/BagContext';
 import {
   VisaIcon,
   MasterCardIcon,
@@ -192,46 +193,10 @@ const PromoCodeSection = React.memo(({ onApplyPromo }) => {
 });
 
 const BagScreen = ({ navigation, route }) => {
-  // State management with better organization
-  const [bagItems, setBagItems] = useState([
-    {
-      id: 1,
-      name: 'Nike Everyday Plus Cushioned',
-      description: 'Training Ankle Socks (6 Pairs)\nSize L (W 10-13 / M 8-12)',
-      price: 'US$10.00',
-      quantity: 1,
-      size: 'M',
-      image: null,
-    },
-    {
-      id: 2,
-      name: 'Nike Everyday Plus Cushioned',
-      description: 'Training Ankle Socks (6 Pairs)\nSize L (W 10-13 / M 8-12)',
-      price: 'US$10.00',
-      quantity: 1,
-      size: 'M',
-      image: null,
-    },
-    {
-      id: 3,
-      name: 'Nike Everyday Plus Cushioned',
-      description: 'Training Ankle Socks (6 Pairs)\nSize L (W 10-13 / M 8-12)',
-      price: 'US$10.00',
-      quantity: 1,
-      size: 'M',
-      image: null,
-    },
-    {
-      id: 4,
-      name: 'Nike Everyday Plus Cushioned',
-      description: 'Training Ankle Socks (6 Pairs)\nSize L (W 10-13 / M 8-12)',
-      price: 'US$10.00',
-      quantity: 1,
-      size: 'M',
-      image: null,
-    },
-  ]);
-
+  // Use BagContext instead of local state
+  const { bagItems, removeFromBag, updateQuantity, updateSize, getTotalPrice } = useBag();
+  
+  // Keep local state for UI modals and other non-bag functionality
   const [modalStates, setModalStates] = useState({
     promoCodeExpanded: false,
     pointsApplied: false,
@@ -245,10 +210,7 @@ const BagScreen = ({ navigation, route }) => {
 
   // Memoized calculations for performance - optimized for better performance
   const bagCalculations = useMemo(() => {
-    const subtotal = bagItems.reduce((total, item) => {
-      const price = parseFloat(item.price.replace('US$', ''));
-      return total + (price * item.quantity);
-    }, 0);
+    const subtotal = getTotalPrice();
     
     const shipping = subtotal > 0 ? 5.00 : 0;
     const tax = subtotal * 0.1; // 10% tax
@@ -263,7 +225,7 @@ const BagScreen = ({ navigation, route }) => {
       total: total.toFixed(2),
       itemCount: bagItems.length,
     };
-  }, [bagItems, modalStates.pointsApplied]);
+  }, [bagItems, modalStates.pointsApplied, getTotalPrice]);
 
   const deliveryInfo = useMemo(() => ({
     dateRange: 'Wed, 11 May to Fri, 13 May',
@@ -282,13 +244,10 @@ const BagScreen = ({ navigation, route }) => {
   useEffect(() => {
     if (route?.params?.updatedItem) {
       const { updatedItem } = route.params;
-      setBagItems(prevItems => 
-        prevItems.map(item => 
-          item.id === updatedItem.id ? updatedItem : item
-        )
-      );
+      // Use context function to update specific item
+      updateQuantity(updatedItem.id, updatedItem.size, updatedItem.quantity);
     }
-  }, [route?.params]);
+  }, [route?.params, updateQuantity]);
 
   // Enhanced navigation handlers
   const handleGoBack = useCallback(() => {
@@ -298,6 +257,13 @@ const BagScreen = ({ navigation, route }) => {
       navigation.navigate('Home');
     }
   }, [navigation]);
+
+  // Redirect to empty bag screen if no items (only when coming from home screen)
+  useEffect(() => {
+    if (bagItems.length === 0 && route?.params?.previousScreen !== 'BagContent') {
+      navigation.navigate('bagemptyscreen');
+    }
+  }, [bagItems.length, navigation, route?.params?.previousScreen]);
 
   const handleNavigateToDelivery = useCallback(() => {
     setModalStates(prev => ({ ...prev, deliveryModalVisible: true }));
@@ -324,21 +290,21 @@ const BagScreen = ({ navigation, route }) => {
 
   // Optimized handler functions with better state management
   const handleQuantityChange = useCallback((itemId, newQuantity) => {
-    if (newQuantity === 0) {
-      setBagItems(prevItems => prevItems.filter(item => item.id !== itemId));
-    } else {
-      setBagItems(prevItems => 
-        prevItems.map(item => 
-          item.id === itemId ? { ...item, quantity: newQuantity } : item
-        )
-      );
+    // Find the item to get its size
+    const foundItem = bagItems.find(bagItem => bagItem.id === itemId);
+    if (foundItem) {
+      updateQuantity(itemId, foundItem.size, newQuantity);
     }
-  }, []);
+  }, [bagItems, updateQuantity]);
 
   const handleRemoveItem = useCallback((itemId, index) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setBagItems(prevItems => prevItems.filter(item => item.id !== itemId));
-  }, []);
+    // Find the item to get its size
+    const foundItem = bagItems.find(bagItem => bagItem.id === itemId);
+    if (foundItem) {
+      removeFromBag(itemId, foundItem.size);
+    }
+  }, [bagItems, removeFromBag]);
 
   const handleOpenQuantityModal = useCallback((item, index) => {
     setSelectedItem(item);
@@ -351,12 +317,12 @@ const BagScreen = ({ navigation, route }) => {
   }, []);
 
   const handleSizeChange = useCallback((itemId, newSize) => {
-    setBagItems(prevItems => 
-      prevItems.map(item => 
-        item.id === itemId ? { ...item, size: newSize } : item
-      )
-    );
-  }, []);
+    // Find the item to get its current size
+    const foundItem = bagItems.find(bagItem => bagItem.id === itemId);
+    if (foundItem) {
+      updateSize(itemId, foundItem.size, newSize);
+    }
+  }, [bagItems, updateSize]);
 
   const handleOpenSizeModal = useCallback((item, index) => {
     setSelectedItem(item);
