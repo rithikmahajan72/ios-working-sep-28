@@ -7,9 +7,11 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Alert,
 } from 'react-native';
 import GlobalBackButton from '../components/GlobalBackButton';
 import { AppleIcon, GoogleIcon } from '../assets/icons';
+import auth from '@react-native-firebase/auth';
 
 const LoginAccountEmail = ({ navigation }) => {
   const [isEmailSelected, setIsEmailSelected] = useState(true);
@@ -18,12 +20,43 @@ const LoginAccountEmail = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleEmailLogin = () => {
-    // TODO: Implement actual email login logic
-    // Login logic removed for production logging
-    
-    if (navigation && navigation.navigate) {
-      navigation.navigate('LoginAccountEmailVerificationCode', { email });
+    // Basic validation
+    if (!email.trim()) {
+      Alert.alert('Error', 'Please enter your email');
+      return;
     }
+
+    if (!password) {
+      Alert.alert('Error', 'Please enter your password');
+      return;
+    }
+
+    // TODO: Implement actual email login logic
+    auth()
+      .signInWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        Alert.alert('Success', `Welcome ${userCredential.user.email}`);
+        // Navigate to main app or dashboard
+        if (navigation && navigation.navigate) {
+          navigation.navigate('LoginAccountEmailVerificationCode', { email });
+        }
+      })
+      .catch((error) => {
+        let errorMessage = 'Login failed. Please try again.';
+        
+        if (error.code === 'auth/user-not-found') {
+          errorMessage = 'No account found with this email address.';
+        } else if (error.code === 'auth/wrong-password') {
+          errorMessage = 'Incorrect password. Please try again.';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMessage = 'That email address is invalid!';
+        } else if (error.code === 'auth/user-disabled') {
+          errorMessage = 'This account has been disabled.';
+        }
+
+        Alert.alert('Login Error', errorMessage);
+        console.error(error);
+      });
   };
 
   const handleToggle = (type) => {

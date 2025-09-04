@@ -7,8 +7,11 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { AppleIcon, GoogleIcon } from '../assets/icons';
+import auth from '@react-native-firebase/auth';
+
 
 const CreateAccountEmail = ({ navigation }) => {
   const [isEmailSelected, setIsEmailSelected] = useState(true);
@@ -26,12 +29,74 @@ const CreateAccountEmail = ({ navigation }) => {
     }
   };
 
-  const handleSignUp = () => {
-    // TODO: Implement actual sign up logic
-    // Sign up logging removed for production
-    
-    if (navigation && navigation.navigate) {
-      navigation.navigate('CreateAccountEmailSuccessModal');
+  const handleSignUp = async () => {
+    // Basic validation
+    if (!name.trim()) {
+      Alert.alert('Error', 'Please enter your name');
+      return;
+    }
+
+    if (!email.trim()) {
+      Alert.alert('Error', 'Please enter your email');
+      return;
+    }
+
+    if (!password) {
+      Alert.alert('Error', 'Please enter a password');
+      return;
+    }
+
+    if (!confirmPassword) {
+      Alert.alert('Error', 'Please confirm your password');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters long');
+      return;
+    }
+
+    try {
+      console.log('Starting user creation...');
+      
+      // Create user with email and password using Firebase Auth
+      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+      console.log('User created successfully:', userCredential.user.uid);
+      
+      // Update user profile with name
+      await userCredential.user.updateProfile({
+        displayName: name
+      });
+      
+      console.log('User profile updated with name:', name);
+      Alert.alert('Success', 'Account created successfully!');
+      
+      // Navigate to success modal or main app
+      if (navigation && navigation.navigate) {
+        navigation.navigate('CreateAccountEmailSuccessModal');
+      }
+      
+    } catch (error) {
+      console.error('Sign up error:', error);
+      let errorMessage = 'Failed to create account';
+      
+      // Handle specific Firebase errors
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'This email is already registered';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address';
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = 'Password is too weak';
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMessage = 'Network error. Please check your connection';
+      }
+      
+      Alert.alert('Error', errorMessage);
     }
   };
 

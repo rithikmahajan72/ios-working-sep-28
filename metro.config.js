@@ -1,4 +1,5 @@
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const path = require('path');
 
 /**
  * Metro configuration
@@ -19,12 +20,21 @@ const config = {
       /android\/build\/.*/,
       /android\/\.gradle\/.*/,
     ],
+    alias: {
+      // Create a safer version of react-native for NativeEventEmitter
+      'react-native$': path.resolve(__dirname, 'src/utils/react-native-safe.js'),
+    },
   },
   watcher: {
     additionalExts: ['ts', 'tsx'],
     watchman: {
       deferStates: ['hg.update'],
     },
+  },
+  transformer: {
+    // Enable Hermes for better performance and error handling
+    hermesCommand: 'node_modules/react-native/sdks/hermesc/%OS-BIN%/hermesc',
+    enableBabelRCLookup: false,
   },
 };
 

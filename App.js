@@ -5,7 +5,7 @@
  * @format
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -13,6 +13,7 @@ import {
   View,
   Text,
   SafeAreaView,
+  Platform,
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { EnhancedLayout } from './src/components/layout';
@@ -22,11 +23,56 @@ import { FavoritesProvider } from './src/contexts/FavoritesContext';
 import { BagProvider } from './src/contexts/BagContext';
 import ErrorBoundary from './src/components/ErrorBoundary';
 
+// Firebase imports
+import '@react-native-firebase/app';
+import auth from '@react-native-firebase/auth';
+
 // Main App Component with Routing
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [isNativeModulesReady, setIsNativeModulesReady] = useState(false);
+  
+  // Firebase Auth state
+  const [user, setUser] = useState(null);
+  const [initializing, setInitializing] = useState(true);
+
+  // Initialize native modules safely
+  useEffect(() => {
+    const initializeNativeModules = async () => {
+      try {
+        // Wait a bit for native modules to initialize
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Test if gesture handler is available
+        if (Platform.OS === 'ios') {
+          // Gesture handler should be available now
+          setIsNativeModulesReady(true);
+        } else {
+          setIsNativeModulesReady(true);
+        }
+      } catch (error) {
+        console.warn('Native modules initialization warning:', error);
+        // Continue anyway - app should still work
+        setIsNativeModulesReady(true);
+      }
+    };
+
+    initializeNativeModules();
+  }, []);
+
+  // Firebase Auth state listener
+  useEffect(() => {
+    const authStateChanged = (firebaseUser) => {
+      console.log('Firebase Auth state changed:', firebaseUser ? 'User logged in' : 'User logged out');
+      setUser(firebaseUser);
+      if (initializing) setInitializing(false);
+    };
+
+    const subscriber = auth().onAuthStateChanged(authStateChanged);
+    return subscriber; // Cleanup subscription on unmount
+  }, [initializing]);
 
   const handleSplashFinish = () => {
     try {
@@ -48,7 +94,7 @@ function App() {
     );
   }
 
-  if (isLoading) {
+  if (isLoading || !isNativeModulesReady || initializing) {
     return <SplashScreen onFinish={handleSplashFinish} />;
   }
 

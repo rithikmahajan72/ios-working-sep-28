@@ -10,11 +10,14 @@ project 'Yoraa.xcodeproj'
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
-linkage = ENV['USE_FRAMEWORKS']
-if linkage != nil
-  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
-  use_frameworks! :linkage => linkage.to_sym
-end
+# Firebase iOS SDK v9+ requires use_frameworks with static linkage
+use_frameworks! :linkage => :static
+
+# Enable Static Frameworks for Firebase
+$RNFirebaseAsStaticFramework = true
+
+# Enable modular headers for Firebase compatibility
+use_modular_headers!
 
 target 'YoraaApp' do
   config = use_native_modules!
