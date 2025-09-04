@@ -7,11 +7,8 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  Dimensions,
 } from 'react-native';
-import { FontSizes, FontWeights, Spacing, BorderRadius, Colors } from '../constants';
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+import { BackIcon } from '../assets/icons';
 
 const CreateAccountMobileNumberVerification = ({ navigation }) => {
   const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
@@ -25,10 +22,17 @@ const CreateAccountMobileNumberVerification = ({ navigation }) => {
     }
   };
 
+  const handleBackPress = () => {
+    // Navigate back to CreateAccountMobileNumber screen
+    if (navigation) {
+      navigation.navigate('CreateAccountMobileNumber');
+    }
+  };
+
   const handleVerification = () => {
     // Handle verification logic
     const code = verificationCode.join('');
-    // Verification code logged - removed for production
+    console.log('Verification code:', code); // For debugging
     
     // Navigate to account created confirmation modal
     if (navigation) {
@@ -67,8 +71,11 @@ const CreateAccountMobileNumberVerification = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        {/* Header with Skip button */}
+        {/* Header with Back button and Skip button */}
         <View style={styles.header}>
+          <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+            <BackIcon size={24} color="#000000" />
+          </TouchableOpacity>
           <TouchableOpacity onPress={handleSkip} style={styles.skipButton}>
             <Text style={styles.skipText}>SKIP</Text>
           </TouchableOpacity>
@@ -151,9 +158,13 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     paddingHorizontal: 32,
     paddingTop: 20,
+  },
+  backButton: {
+    paddingVertical: 8,
+    paddingRight: 8,
   },
   skipButton: {
     paddingVertical: 8,
