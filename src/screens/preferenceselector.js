@@ -52,18 +52,28 @@ const PreferenceSelector = ({ navigation, visible = true, onClose, route }) => {
         useNativeDriver: false,
       }),
     ]).start(() => {
-      // Close the modal first
+      // Check if this is coming from authentication flow
+      const user = route?.params?.user;
+      const isNewUser = route?.params?.isNewUser;
+      
+      if (navigation) {
+        if (user && isNewUser) {
+          // If user dismisses during onboarding, go back to terms
+          navigation.navigate('TermsAndConditions', {
+            previousScreen: route?.params?.previousScreen,
+            user: user,
+            isNewUser: isNewUser
+          });
+        } else {
+          // Fallback navigation
+          navigation.navigate('LoginAccountMobileNumber');
+        }
+      }
       if (onClose) {
         onClose();
       }
-      // Then navigate to LoginAccountMobileNumber
-      if (navigation) {
-        navigation.navigate('LoginAccountMobileNumber');
-      }
     });
-  }, [slideAnim, opacityAnim, backdropOpacity, onClose, navigation]);
-
-  // Animation effect when modal becomes visible - enhanced for backdrop
+  }, [navigation, onClose, slideAnim, opacityAnim, backdropOpacity, route?.params]);  // Animation effect when modal becomes visible - enhanced for backdrop
   useEffect(() => {
     if (visible) {
       // Start entrance animation (down to up)
@@ -125,15 +135,24 @@ const PreferenceSelector = ({ navigation, visible = true, onClose, route }) => {
         useNativeDriver: false,
       }),
     ]).start(() => {
-      // Navigate specifically to LoginAccountMobileNumber screen
+      // Check if this is coming from authentication flow
+      const user = route?.params?.user;
+      const isNewUser = route?.params?.isNewUser;
+      
       if (navigation) {
-        navigation.navigate('LoginAccountMobileNumber');
+        if (user && isNewUser) {
+          // Navigate to Home after completing onboarding
+          navigation.navigate('Home');
+        } else {
+          // Fallback to LoginAccountMobileNumber for other cases
+          navigation.navigate('LoginAccountMobileNumber');
+        }
       }
       if (onClose) {
         onClose();
       }
     });
-  }, [navigation, onClose, slideAnim, opacityAnim]);
+  }, [navigation, onClose, slideAnim, opacityAnim, route?.params]);
 
   // Enhanced PanResponder with proper closing functionality
   const panResponder = useRef(

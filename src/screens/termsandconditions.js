@@ -51,14 +51,18 @@ const TermsAndConditions = ({ navigation, route }) => {
     if (isAccepted) {
       // Handle acceptance and proceed to preference selector
       
-      // Get the previousScreen from route params to pass along
+      // Get the user data and previousScreen from route params to pass along
       const previousScreen = route?.params?.previousScreen;
+      const user = route?.params?.user;
+      const isNewUser = route?.params?.isNewUser;
       
       // Navigate to Preference Selector modal after accepting terms
-      // Pass the previousScreen parameter so PreferenceSelector can skip back to the original screen
+      // Pass user data so PreferenceSelector can navigate to HomeScreen
       if (navigation) {
         navigation.navigate('PreferenceSelector', { 
-          previousScreen: previousScreen 
+          previousScreen: previousScreen,
+          user: user,
+          isNewUser: isNewUser
         });
       }
     }

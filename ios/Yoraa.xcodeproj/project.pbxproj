@@ -26,6 +26,7 @@
 		956B0500A93C0C30CE116884 /* Pods-YoraaApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-YoraaApp.release.xcconfig"; path = "Target Support Files/Pods-YoraaApp/Pods-YoraaApp.release.xcconfig"; sourceTree = "<group>"; };
 		9C69875C1CD6C2BF17BBB38E /* Pods_YoraaApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_YoraaApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1B2C3D4E5F6789012345679 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "YoraaApp/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		BB1536C82E6A4BC9004CD715 /* YoraaAppRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = YoraaAppRelease.entitlements; path = YoraaApp/YoraaAppRelease.entitlements; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -44,6 +45,7 @@
 		13B07FAE1A68108700A75B9A /* YoraaApp */ = {
 			isa = PBXGroup;
 			children = (
+				BB1536C82E6A4BC9004CD715 /* YoraaAppRelease.entitlements */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				A1B2C3D4E5F6789012345679 /* GoogleService-Info.plist */,
@@ -277,6 +279,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = YoraaApp/YoraaApp.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UX6XB9FMNN;
@@ -295,6 +299,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.yoraaapparelsprivatelimited.yoraa;
 				PRODUCT_NAME = YoraaApp;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -307,6 +312,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = "YoraaApp/YoraaAppRelease.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UX6XB9FMNN;
@@ -324,6 +331,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.yoraaapparelsprivatelimited.yoraa;
 				PRODUCT_NAME = YoraaApp;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};

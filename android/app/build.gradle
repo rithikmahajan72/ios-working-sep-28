@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.yoraaapp"
+    namespace "com.yoraapparelsprivatelimited.yoraa"
     defaultConfig {
-        applicationId "com.yoraaapp"
+        applicationId "com.yoraapparelsprivatelimited.yoraa"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -118,6 +118,8 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", "false"
+            buildConfigField "boolean", "IS_HERMES_ENABLED", "false"
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
@@ -125,6 +127,8 @@ android {
             signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", "false"
+            buildConfigField "boolean", "IS_HERMES_ENABLED", "false"
         }
     }
 }
@@ -133,9 +137,14 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
 
-    if (hermesEnabled.toBoolean()) {
-        implementation("com.facebook.react:hermes-android")
-    } else {
-        implementation jscFlavor
-    }
+    // Use JSC instead of Hermes for now
+    implementation jscFlavor
+
+    // Firebase dependencies
+    implementation platform('com.google.firebase:firebase-bom:34.2.0')
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-analytics'
+
+    // Google Sign-In dependency
+    implementation 'com.google.android.gms:play-services-auth:21.4.0'
 }
