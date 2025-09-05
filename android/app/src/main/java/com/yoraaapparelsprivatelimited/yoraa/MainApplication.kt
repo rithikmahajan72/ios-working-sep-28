@@ -1,4 +1,4 @@
-package com.yoraaapp
+package com.yoraaapparelsprivatelimited.yoraa
 
 import android.app.Application
 import com.facebook.react.PackageList

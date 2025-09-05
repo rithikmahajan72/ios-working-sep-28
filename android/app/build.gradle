@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.yoraaapp"
+    namespace "com.yoraapparelsprivatelimited.yoraa"
     defaultConfig {
-        applicationId "com.yoraaapp"
+        applicationId "com.yoraapparelsprivatelimited.yoraa"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

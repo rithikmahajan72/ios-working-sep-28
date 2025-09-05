@@ -7,21 +7,70 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Alert,
 } from 'react-native';
 import GlobalBackButton from '../components/GlobalBackButton';
+import phoneAuthService from '../services/phoneAuthService';
 
-const LoginAccountMobileNumberVerificationCode = ({ navigation }) => {
+const LoginAccountMobileNumberVerificationCode = ({ navigation, route }) => {
   const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
   const [resendTimer, setResendTimer] = useState(30);
+  const [isLoading, setIsLoading] = useState(false);
   const inputRefs = useRef([]);
+  
+  // Get params from navigation
+  const phoneNumber = route?.params?.phoneNumber || '';
+  const confirmation = route?.params?.confirmation || null;
+  const countryCode = route?.params?.countryCode || '';
+  const mobileNumber = route?.params?.mobileNumber || '';
 
-  const handleVerification = () => {
-    // Handle verification logic
+  const handleVerification = async () => {
     const code = verificationCode.join('');
     
-    // Navigate to Terms and Conditions screen after successful login verification
-    if (navigation) {
-      navigation.navigate('TermsAndConditions', { previousScreen: 'LoginAccountMobileNumberVerificationCode' });
+    if (code.length !== 6) {
+      Alert.alert('Error', 'Please enter the complete 6-digit verification code');
+      return;
+    }
+
+    if (!confirmation) {
+      Alert.alert('Error', 'No verification session found. Please request a new OTP.');
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      console.log('Verifying OTP:', code);
+      
+      // Verify OTP using Firebase Phone Auth
+      const userCredential = await phoneAuthService.verifyOTP(code, confirmation);
+      
+      console.log('Phone authentication successful:', userCredential.user.uid);
+      
+      Alert.alert(
+        'Success', 
+        'Phone number verified successfully!',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              // Navigate to Terms and Conditions screen after successful login verification
+              if (navigation) {
+                navigation.navigate('TermsAndConditions', { 
+                  previousScreen: 'LoginAccountMobileNumberVerificationCode',
+                  user: userCredential.user
+                });
+              }
+            }
+          }
+        ]
+      );
+      
+    } catch (error) {
+      console.error('OTP verification error:', error);
+      Alert.alert('Error', error.message || 'Invalid verification code. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -44,10 +93,39 @@ const LoginAccountMobileNumberVerificationCode = ({ navigation }) => {
     }
   };
 
-  const handleResendCode = () => {
-    // Handle resend code logic
-    setResendTimer(30);
-    // Reset timer countdown logic would go here
+  const handleResendCode = async () => {
+    if (!phoneNumber) {
+      Alert.alert('Error', 'Phone number not found. Please go back and try again.');
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      console.log('Resending OTP to:', phoneNumber);
+      
+      // Resend OTP using Firebase Phone Auth
+      const newConfirmation = await phoneAuthService.resendOTP(phoneNumber);
+      
+      // Update the confirmation object for this screen
+      if (route?.params) {
+        route.params.confirmation = newConfirmation;
+      }
+      
+      // Reset verification code inputs
+      setVerificationCode(['', '', '', '', '', '']);
+      
+      // Reset timer and restart countdown
+      setResendTimer(30);
+      
+      Alert.alert('Success', 'A new verification code has been sent to your phone.');
+      
+    } catch (error) {
+      console.error('Resend OTP error:', error);
+      Alert.alert('Error', error.message || 'Failed to resend OTP. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const isCodeComplete = verificationCode.every(digit => digit !== '');
@@ -67,7 +145,7 @@ const LoginAccountMobileNumberVerificationCode = ({ navigation }) => {
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Verify your mobile number</Text>
           <Text style={styles.subtitle}>
-            We've sent a 6-digit verification code to your mobile number for login
+            We've sent a 6-digit verification code to {phoneNumber || 'your mobile number'} for login
           </Text>
         </View>
 
@@ -97,16 +175,16 @@ const LoginAccountMobileNumberVerificationCode = ({ navigation }) => {
         <TouchableOpacity 
           style={[
             styles.verifyButton,
-            !isCodeComplete && styles.verifyButtonDisabled
+            (!isCodeComplete || isLoading) && styles.verifyButtonDisabled
           ]} 
           onPress={handleVerification}
-          disabled={!isCodeComplete}
+          disabled={!isCodeComplete || isLoading}
         >
           <Text style={[
             styles.verifyButtonText,
-            !isCodeComplete && styles.verifyButtonTextDisabled
+            (!isCodeComplete || isLoading) && styles.verifyButtonTextDisabled
           ]}>
-            VERIFY & LOGIN
+            {isLoading ? 'VERIFYING...' : 'VERIFY & LOGIN'}
           </Text>
         </TouchableOpacity>
 

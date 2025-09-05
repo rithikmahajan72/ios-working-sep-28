@@ -10,10 +10,15 @@ import {
   Modal,
   FlatList,
   Animated,
+  Alert,
+  Platform,
 } from 'react-native';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import GlobalBackButton from '../components/GlobalBackButton';
 import { AppleIcon, GoogleIcon, CaretDownIcon } from '../assets/icons';
+import phoneAuthService from '../services/phoneAuthService';
+import appleAuthService from '../services/appleAuthService';
+import googleAuthService from '../services/googleAuthService';
 
 // Comprehensive country codes data
 const countryCodes = [
@@ -250,6 +255,7 @@ const LoginAccountMobileNumber = ({ navigation }) => {
   const [selectedCountry, setSelectedCountry] = useState(countryCodes.find(c => c.code === '+91') || countryCodes[0]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [translateY] = useState(new Animated.Value(0));
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCountrySelect = (country) => {
     setSelectedCountry(country);
@@ -293,12 +299,57 @@ const LoginAccountMobileNumber = ({ navigation }) => {
     </TouchableOpacity>
   );
 
-  const handleLogin = () => {
-    // Handle login logic
+  const handleLogin = async () => {
+    if (!mobileNumber.trim()) {
+      Alert.alert('Error', 'Please enter a valid mobile number');
+      return;
+    }
+
+    if (mobileNumber.length < 10) {
+      Alert.alert('Error', 'Please enter a valid 10-digit mobile number');
+      return;
+    }
+
+    setIsLoading(true);
     
-    // Navigate to verification code screen
-    if (navigation) {
-      navigation.navigate('LoginAccountMobileNumberVerificationCode');
+    try {
+      // Format phone number with country code
+      const formattedPhoneNumber = phoneAuthService.formatPhoneNumber(
+        selectedCountry.code, 
+        mobileNumber
+      );
+      
+      console.log('Sending OTP to:', formattedPhoneNumber);
+      
+      // Send OTP using Firebase Phone Auth
+      const confirmation = await phoneAuthService.sendOTP(formattedPhoneNumber);
+      
+      Alert.alert(
+        'OTP Sent', 
+        `A verification code has been sent to ${formattedPhoneNumber}`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              // Navigate to verification code screen with confirmation object
+              if (navigation) {
+                navigation.navigate('LoginAccountMobileNumberVerificationCode', {
+                  phoneNumber: formattedPhoneNumber,
+                  confirmation: confirmation,
+                  countryCode: selectedCountry.code,
+                  mobileNumber: mobileNumber
+                });
+              }
+            }
+          }
+        ]
+      );
+      
+    } catch (error) {
+      console.error('Phone authentication error:', error);
+      Alert.alert('Error', error.message || 'Failed to send OTP. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -309,8 +360,82 @@ const LoginAccountMobileNumber = ({ navigation }) => {
     }
   };
 
-  const handleSocialLogin = (provider) => {
-    // Handle social login
+  const handleSocialLogin = async (provider) => {
+    if (provider === 'apple') {
+      if (Platform.OS !== 'ios') {
+        Alert.alert('Error', 'Apple Sign In is only available on iOS devices');
+        return;
+      }
+
+      if (!appleAuthService.isAppleAuthAvailable()) {
+        Alert.alert('Error', 'Apple Sign In is not available on this device');
+        return;
+      }
+
+      setIsLoading(true);
+      
+      try {
+        console.log('Starting Apple Sign In...');
+        const userCredential = await appleAuthService.signInWithApple();
+        const isNewUser = userCredential.additionalUserInfo?.isNewUser;
+        
+        console.log('Apple Sign In successful, isNewUser:', isNewUser);
+        
+        // Navigate based on user type
+        if (isNewUser) {
+          // First-time user: Show terms and conditions first
+          navigation.navigate('TermsAndConditions', { 
+            previousScreen: 'AppleSignIn',
+            user: userCredential.user,
+            isNewUser: true
+          });
+        } else {
+          // Returning user: Go directly to HomeScreen
+          console.log('Returning user - navigating directly to HomeScreen');
+          navigation.navigate('Home');
+        }
+        
+      } catch (error) {
+        console.error('Apple Sign In error:', error);
+        if (error.message !== 'Apple Sign In was canceled') {
+          Alert.alert('Error', error.message || 'Apple Sign In failed. Please try again.');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    } else if (provider === 'google') {
+      setIsLoading(true);
+      
+      try {
+        console.log('Starting Google Sign In...');
+        const userCredential = await googleAuthService.signInWithGoogle();
+        const isNewUser = userCredential.additionalUserInfo?.isNewUser;
+        
+        console.log('Google Sign In successful, isNewUser:', isNewUser);
+        
+        // Navigate based on user type (same logic as Apple Sign In)
+        if (isNewUser) {
+          // First-time user: Show terms and conditions first
+          navigation.navigate('TermsAndConditions', { 
+            previousScreen: 'GoogleSignIn',
+            user: userCredential.user,
+            isNewUser: true
+          });
+        } else {
+          // Returning user: Go directly to Home
+          console.log('Returning user - navigating directly to Home');
+          navigation.navigate('Home');
+        }
+        
+      } catch (error) {
+        console.error('Google Sign In error:', error);
+        if (error.message !== 'Google Sign In was canceled') {
+          Alert.alert('Error', error.message || 'Google Sign In failed. Please try again.');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   return (
@@ -419,16 +544,16 @@ const LoginAccountMobileNumber = ({ navigation }) => {
         <TouchableOpacity 
           style={[
             styles.loginButton,
-            !mobileNumber && styles.loginButtonDisabled
+            (!mobileNumber || isLoading) && styles.loginButtonDisabled
           ]} 
           onPress={handleLogin}
-          disabled={!mobileNumber}
+          disabled={!mobileNumber || isLoading}
         >
           <Text style={[
             styles.loginButtonText,
-            !mobileNumber && styles.loginButtonTextDisabled
+            (!mobileNumber || isLoading) && styles.loginButtonTextDisabled
           ]}>
-            LOGIN
+            {isLoading ? 'SENDING OTP...' : 'LOGIN'}
           </Text>
         </TouchableOpacity>
 
@@ -440,15 +565,17 @@ const LoginAccountMobileNumber = ({ navigation }) => {
         {/* Social Login Options */}
         <View style={styles.socialContainer}>
           <TouchableOpacity 
-            style={styles.socialButton}
+            style={[styles.socialButton, isLoading && styles.socialButtonDisabled]}
             onPress={() => handleSocialLogin('apple')}
+            disabled={isLoading}
           >
             <AppleIcon width={42} height={42} color="#332218" />
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={styles.socialButton}
+            style={[styles.socialButton, isLoading && styles.socialButtonDisabled]}
             onPress={() => handleSocialLogin('google')}
+            disabled={isLoading}
           >
             <GoogleIcon width={42} height={42} />
           </TouchableOpacity>
