@@ -404,10 +404,32 @@ const LoginAccountMobileNumber = ({ navigation }) => {
         setIsLoading(false);
       }
     } else if (provider === 'google') {
+      // Check if Google Sign-in is available before proceeding
+      if (!googleAuthService.isAvailable()) {
+        Alert.alert(
+          'Google Sign-in Unavailable', 
+          'Google Sign-in is not available on this device. This may be due to missing Google Play Services or a configuration issue.'
+        );
+        return;
+      }
+
       setIsLoading(true);
       
       try {
-        console.log('Starting Google Sign In...');
+        console.log('Starting Google Sign In for', Platform.OS);
+        
+        // Android-specific pre-check
+        if (Platform.OS === 'android') {
+          console.log('Performing Android-specific Google Sign In checks...');
+          const configCheck = await googleAuthService.checkAndroidConfiguration();
+          
+          if (!configCheck.success) {
+            throw new Error(configCheck.message);
+          }
+          
+          console.log('Android configuration check passed:', configCheck.message);
+        }
+        
         const userCredential = await googleAuthService.signInWithGoogle();
         const isNewUser = userCredential.additionalUserInfo?.isNewUser;
         
@@ -428,9 +450,23 @@ const LoginAccountMobileNumber = ({ navigation }) => {
         }
         
       } catch (error) {
-        console.error('Google Sign In error:', error);
+        console.error('Google Sign In error on', Platform.OS, ':', error);
+        
         if (error.message !== 'Google Sign In was canceled') {
-          Alert.alert('Error', error.message || 'Google Sign In failed. Please try again.');
+          let errorMessage = error.message || 'Google Sign In failed. Please try again.';
+          
+          // Android-specific error messages
+          if (Platform.OS === 'android') {
+            if (error.message?.includes('Google Play Services')) {
+              errorMessage = 'Please update Google Play Services and try again.';
+            } else if (error.message?.includes('network')) {
+              errorMessage = 'Network error. Please check your internet connection and try again.';
+            } else if (error.message?.includes('configuration')) {
+              errorMessage = 'Google Sign In is not properly configured. Please contact support.';
+            }
+          }
+          
+          Alert.alert('Google Sign In Error', errorMessage);
         }
       } finally {
         setIsLoading(false);

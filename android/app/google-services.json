@@ -14,7 +14,23 @@
       },
       "oauth_client": [
         {
-          "client_id": "133733122921-cr74erk8tdpgt1akts7juqq0cm44bjda.apps.googleusercontent.com",
+          "client_id": "133733122921-6k252j8o0n8ej7iqf03t9ngk2fe5ur85.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.yoraapparelsprivatelimited.yoraa",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "133733122921-c46gfe5e2ae4r980i5bc7ogh2f7qcfjo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.yoraapparelsprivatelimited.yoraa",
+            "certificate_hash": "8487d61de8145729d9869c44753535477de47d2f"
+          }
+        },
+        {
+          "client_id": "133733122921-g3f9l1865vk4bchuc8cmu7qpq9o8ukkk.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -31,7 +47,7 @@
               "client_type": 3
             },
             {
-              "client_id": "133733122921-f7mallth51qdmvl984o01s9dae48ptcr.apps.googleusercontent.com",
+              "client_id": "133733122921-535l0n0ld9ncak8bnic262sp0vnjrj92.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.yoraaapparelsprivatelimited.yoraa"
