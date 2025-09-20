@@ -43,13 +43,15 @@ const SettingsScreen = ({ navigation }) => {
   };
 
   const handleLinkedAccounts = () => {
-    // Linked accounts functionality removed for production logging
-    // Navigate to linked accounts screen
+    if (navigation && navigation.navigate) {
+      navigation.navigate('LinkedAccount');
+    }
   };
 
   const handleDeleteAccount = () => {
-    // Delete account functionality removed for production logging
-    // Show confirmation modal
+    if (navigation && navigation.navigate) {
+      navigation.navigate('DeleteAccount');
+    }
   };
 
   const handleBack = () => {
