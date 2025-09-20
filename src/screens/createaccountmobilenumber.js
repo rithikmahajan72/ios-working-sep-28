@@ -6,13 +6,16 @@ import {
   SafeAreaView,
   TouchableOpacity,
   TextInput,
-  ScrollView,
   Modal,
   FlatList,
   Animated,
+  Alert,
+  Platform,
 } from 'react-native';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { CaretDownIcon, BackIcon, AppleIcon, GoogleIcon } from '../assets/icons';
+import appleAuthService from '../services/appleAuthService';
+import googleAuthService from '../services/googleAuthService';
 
 // Comprehensive country codes data
 const countryCodes = [
@@ -247,6 +250,7 @@ const CreateAccountMobileNumber = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [translateY] = useState(new Animated.Value(0));
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCountrySelect = (country) => {
     setSelectedCountry(country);
@@ -323,24 +327,139 @@ const CreateAccountMobileNumber = ({ navigation }) => {
     }
   };
 
-  const handleSignUpLink = () => {
-    // Handle "Sign Up" link in the footer
+  const handleLoginLink = () => {
+    // Navigate to login screen
+    if (navigation) {
+      navigation.navigate('LoginAccountMobileNumber');
+    }
+  };
+
+  const handleSocialLogin = async (provider) => {
+    if (provider === 'apple') {
+      if (Platform.OS !== 'ios') {
+        Alert.alert('Error', 'Apple Sign In is only available on iOS devices');
+        return;
+      }
+
+      if (!appleAuthService.isAppleAuthAvailable()) {
+        Alert.alert('Error', 'Apple Sign In is not available on this device');
+        return;
+      }
+
+      setIsLoading(true);
+      
+      try {
+        console.log('Starting Apple Sign In...');
+        const userCredential = await appleAuthService.signInWithApple();
+        const isNewUser = userCredential.additionalUserInfo?.isNewUser;
+        
+        console.log('Apple Sign In successful, isNewUser:', isNewUser);
+        
+        // Navigate based on user type
+        if (isNewUser) {
+          // First-time user: Show terms and conditions first
+          navigation.navigate('TermsAndConditions', { 
+            previousScreen: 'AppleSignIn',
+            user: userCredential.user,
+            isNewUser: true
+          });
+        } else {
+          // Returning user: Go directly to HomeScreen
+          console.log('Returning user - navigating directly to HomeScreen');
+          navigation.navigate('Home');
+        }
+        
+      } catch (error) {
+        console.error('Apple Sign In error:', error);
+        if (error.message !== 'Apple Sign In was canceled') {
+          Alert.alert('Error', error.message || 'Apple Sign In failed. Please try again.');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    } else if (provider === 'google') {
+      // Check if Google Sign-in is available before proceeding
+      if (!googleAuthService.isAvailable()) {
+        Alert.alert(
+          'Google Sign-in Unavailable', 
+          'Google Sign-in is not available on this device. This may be due to missing Google Play Services or a configuration issue.'
+        );
+        return;
+      }
+
+      setIsLoading(true);
+      
+      try {
+        console.log('Starting Google Sign In for', Platform.OS);
+        
+        // Android-specific pre-check
+        if (Platform.OS === 'android') {
+          console.log('Performing Android-specific Google Sign In checks...');
+          const configCheck = await googleAuthService.checkAndroidConfiguration();
+          
+          if (!configCheck.success) {
+            throw new Error(configCheck.message);
+          }
+          
+          console.log('Android configuration check passed:', configCheck.message);
+        }
+        
+        const userCredential = await googleAuthService.signInWithGoogle();
+        const isNewUser = userCredential.additionalUserInfo?.isNewUser;
+        
+        console.log('Google Sign In successful, isNewUser:', isNewUser);
+        
+        // Navigate based on user type (same logic as Apple Sign In)
+        if (isNewUser) {
+          // First-time user: Show terms and conditions first
+          navigation.navigate('TermsAndConditions', { 
+            previousScreen: 'GoogleSignIn',
+            user: userCredential.user,
+            isNewUser: true
+          });
+        } else {
+          // Returning user: Go directly to Home
+          console.log('Returning user - navigating directly to Home');
+          navigation.navigate('Home');
+        }
+        
+      } catch (error) {
+        console.error('Google Sign In error on', Platform.OS, ':', error);
+        
+        if (error.message !== 'Google Sign In was canceled') {
+          let errorMessage = error.message || 'Google Sign In failed. Please try again.';
+          
+          // Android-specific error messages
+          if (Platform.OS === 'android') {
+            if (error.message?.includes('Google Play Services')) {
+              errorMessage = 'Please update Google Play Services and try again.';
+            } else if (error.message?.includes('network')) {
+              errorMessage = 'Network error. Please check your internet connection and try again.';
+            } else if (error.message?.includes('configuration')) {
+              errorMessage = 'Google Sign In is not properly configured. Please contact support.';
+            }
+          }
+          
+          Alert.alert('Google Sign In Error', errorMessage);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   const handleAppleLogin = () => {
-    // Handle Apple login
+    handleSocialLogin('apple');
   };
 
   const handleGoogleLogin = () => {
-    // Handle Google login
+    handleSocialLogin('google');
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView 
-        style={styles.scrollContainer} 
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+      <View 
+        style={styles.contentContainer}
       >
         {/* Header with Back button and Skip button */}
         <View style={styles.header}>
@@ -480,8 +599,14 @@ const CreateAccountMobileNumber = ({ navigation }) => {
         </Modal>
 
         {/* Sign Up Button */}
-        <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
-          <Text style={styles.signUpButtonText}>SIGN UP</Text>
+        <TouchableOpacity 
+          style={[styles.signUpButton, isLoading && styles.signUpButtonDisabled]} 
+          onPress={handleSignUp}
+          disabled={isLoading}
+        >
+          <Text style={[styles.signUpButtonText, isLoading && styles.signUpButtonTextDisabled]}>
+            {isLoading ? 'CREATING ACCOUNT...' : 'SIGN UP'}
+          </Text>
         </TouchableOpacity>
 
         {/* Divider with "or log in with" */}
@@ -493,10 +618,18 @@ const CreateAccountMobileNumber = ({ navigation }) => {
 
         {/* Social Login Buttons */}
         <View style={styles.socialButtonsContainer}>
-          <TouchableOpacity style={styles.socialButton} onPress={handleAppleLogin}>
+          <TouchableOpacity 
+            style={[styles.socialButton, isLoading && styles.socialButtonDisabled]} 
+            onPress={handleAppleLogin}
+            disabled={isLoading}
+          >
             <AppleIcon width={42} height={42} color="#332218" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.socialButton} onPress={handleGoogleLogin}>
+          <TouchableOpacity 
+            style={[styles.socialButton, isLoading && styles.socialButtonDisabled]} 
+            onPress={handleGoogleLogin}
+            disabled={isLoading}
+          >
             <GoogleIcon width={42} height={42} />
           </TouchableOpacity>
         </View>
@@ -504,13 +637,14 @@ const CreateAccountMobileNumber = ({ navigation }) => {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Don't have an account?{' '}
-            <Text style={styles.footerLink} onPress={handleSignUpLink}>
-              Sign Up
+            Already have an account?{' '}
+            <Text style={styles.footerLink} onPress={handleLoginLink}>
+              Log in
             </Text>
           </Text>
         </View>
-      </ScrollView>
+
+      </View>
     </SafeAreaView>
   );
 };
@@ -520,15 +654,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  scrollContainer: {
+  contentContainer: {
     flex: 1,
+    paddingHorizontal: 20,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 32,
-    paddingTop: 20,
+    paddingHorizontal: 8,
+    paddingTop: 5,
   },
   backButton: {
     paddingVertical: 8,
@@ -536,6 +671,7 @@ const styles = StyleSheet.create({
   },
   skipButton: {
     paddingVertical: 8,
+    paddingHorizontal: 19,
   },
   skipText: {
     fontSize: 14,
@@ -544,8 +680,8 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   titleContainer: {
-    paddingHorizontal: 33,
-    marginTop: 40,
+    paddingHorizontal: 34,
+    marginTop: 15,
   },
   title: {
     fontSize: 24,
@@ -556,7 +692,7 @@ const styles = StyleSheet.create({
   },
   toggleContainer: {
     alignItems: 'center',
-    marginTop: 66,
+    marginTop: 30,
   },
   toggleBackground: {
     flexDirection: 'row',
@@ -585,8 +721,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   inputContainer: {
-    paddingHorizontal: 38,
-    marginTop: 132,
+    paddingHorizontal: 39,
+    marginTop: 35,
     position: 'relative',
   },
   inputWrapper: {
@@ -696,13 +832,16 @@ const styles = StyleSheet.create({
     color: '#000000',
   },
   signUpButton: {
-    marginHorizontal: 38,
-    marginTop: 64,
+    marginHorizontal: 39,
+    marginTop: 25,
     backgroundColor: '#000000',
     borderRadius: 26.5,
     height: 51,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  signUpButtonDisabled: {
+    backgroundColor: '#CCCCCC',
   },
   signUpButtonText: {
     fontSize: 16,
@@ -711,11 +850,14 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     textTransform: 'uppercase',
   },
+  signUpButtonTextDisabled: {
+    color: '#999999',
+  },
   dividerSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 38,
-    marginTop: 149,
+    marginHorizontal: 39,
+    marginTop: 40,
   },
   dividerLine: {
     flex: 1,
@@ -733,21 +875,27 @@ const styles = StyleSheet.create({
   socialButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 36,
+    marginTop: 26,
     gap: 20,
   },
   socialButton: {
     width: 42,
     height: 42,
-    borderRadius: 21,
-    backgroundColor: '#ffffff',
+    borderRadius: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.14)',
+    borderWidth: 1,
+    borderColor: '#332218',
     justifyContent: 'center',
     alignItems: 'center',
   },
+  socialButtonDisabled: {
+    opacity: 0.5,
+  },
   footer: {
     alignItems: 'center',
-    marginTop: 120,
+    marginTop: 40,
     marginBottom: 40,
+    paddingHorizontal: 64,
   },
   footerText: {
     fontSize: 14,

@@ -1,14 +1,24 @@
 # Resolve react_native_pods.rb with node to allow for hoisting
-require Pod::Executable.execute_command('node', ['-p',
-  'require.resolve(
-    "react-native/scripts/react_native_pods.rb",
-    {paths: [process.argv[1]]},
-  )', __dir__]).strip
+def node_require(script)
+  require Pod::Executable.execute_command('node', ['-p',
+    "require.resolve(
+      '#{script}',
+      {paths: [process.argv[1]]},
+    )", __dir__]).strip
+end
+
+node_require('react-native/scripts/react_native_pods.rb')
+node_require('react-native-permissions/scripts/setup.rb')
 
 project 'Yoraa.xcodeproj'
 
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
+
+# Setup permissions for react-native-permissions
+setup_permissions([
+  'Camera',
+])
 
 # Firebase iOS SDK v9+ requires use_frameworks with static linkage
 use_frameworks! :linkage => :static
@@ -27,6 +37,9 @@ target 'YoraaApp' do
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
+
+  # Add react-native-camera without subspecs to avoid MLKit conflicts
+  # The scanner functionality will work with basic camera features
 
   post_install do |installer|
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202

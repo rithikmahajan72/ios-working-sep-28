@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   },
   instructionsContainer: {
     paddingHorizontal: 32,
-    paddingTop: 70,
+    paddingTop: 16,
     gap: 18,
   },
   headerSection: {

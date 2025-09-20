@@ -10,6 +10,7 @@ export { default as GlobalSearchIcon } from './GlobalSearchIcon';
 export { default as FilterIcon } from './FilterIcon';
 export { default as HeartIcon } from './HeartIcon';
 export { default as BackIcon } from './BackIcon';
+export { default as StarIcon } from './StarIcon';
 export { default as ForwardArrowIcon } from './ForwardArrowIcon';
 export { default as MicrophoneIcon } from './MicrophoneIcon';
 export { default as CameraIcon } from './CameraIcon';

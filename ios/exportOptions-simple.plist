@@ -3,12 +3,20 @@
 <plist version="1.0">
 <dict>
     <key>method</key>
-    <string>debugging</string>
-    <key>teamID</key>
-    <string>UX6XB9FMNN</string>
-    <key>compileBitcode</key>
-    <false/>
+    <string>app-store</string>
     <key>destination</key>
     <string>export</string>
+    <key>teamID</key>
+    <string>UX6XB9FMNN</string>
+    <key>uploadBitcode</key>
+    <false/>
+    <key>uploadSymbols</key>
+    <true/>
+    <key>compileBitcode</key>
+    <false/>
+    <key>signingStyle</key>
+    <string>automatic</string>
+    <key>manageAppVersionAndBuildNumber</key>
+    <true/>
 </dict>
 </plist>

@@ -11,34 +11,17 @@ import {
 } from 'react-native';
 import { FontSizes, FontWeights, Spacing, BorderRadius } from '../constants';
 import BottomNavigationBar from '../components/bottomnavigationbar';
+import GlobalBackButton from '../components/GlobalBackButton';
+import { StarIcon } from '../assets/icons';
 
 const { width } = Dimensions.get('window');
 
 const ProductDetailsMainReview = ({ navigation, route }) => {
   const [selectedFilter, setSelectedFilter] = useState('All');
 
-  const BackIcon = () => (
-    <View style={styles.backIcon}>
-      <View style={styles.backArrow} />
-    </View>
-  );
-
-  const SearchIcon = () => (
-    <View style={styles.searchIcon}>
-      <View style={styles.searchCircle} />
-      <View style={styles.searchHandle} />
-    </View>
-  );
-
-  const StarIcon = ({ filled = true, size = 'small' }) => (
-    <View style={[styles.starIcon, size === 'large' && styles.starIconLarge]}>
-      <View style={[styles.star, filled && styles.starFilled, size === 'large' && styles.starLarge]} />
-    </View>
-  );
-
   const handleBackPress = () => {
     if (navigation) {
-      navigation.goBack();
+      navigation.navigate('ProductDetailsMain');
     }
   };
 
@@ -114,7 +97,7 @@ const ProductDetailsMainReview = ({ navigation, route }) => {
         </View>
         <View style={styles.ratingContainer}>
           {[1, 2, 3, 4, 5].map((star) => (
-            <StarIcon key={star} filled={star <= review.rating} />
+            <StarIcon key={star} filled={star <= review.rating} size={16} />
           ))}
         </View>
       </View>
@@ -133,28 +116,14 @@ const ProductDetailsMainReview = ({ navigation, route }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      
-      {/* System Bar */}
-      <View style={styles.systemBar}>
-        <Text style={styles.systemTime}>9:41</Text>
-        <View style={styles.systemIcons}>
-          <View style={styles.signalIcon} />
-          <View style={styles.wifiIcon} />
-          <View style={styles.batteryIcon} />
-        </View>
-      </View>
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerButton} onPress={handleBackPress}>
-          <BackIcon />
-        </TouchableOpacity>
+        <GlobalBackButton onPress={handleBackPress} />
         
         <Text style={styles.headerTitle}>Reviews</Text>
         
-        <TouchableOpacity style={styles.headerButton}>
-          <SearchIcon />
-        </TouchableOpacity>
+        <View style={styles.headerButton} />
       </View>
 
       <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
@@ -164,7 +133,7 @@ const ProductDetailsMainReview = ({ navigation, route }) => {
             <Text style={styles.ratingScoreMain}>4.5</Text>
             <View style={styles.starsContainer}>
               {[1, 2, 3, 4, 5].map((star) => (
-                <StarIcon key={star} filled={star <= 4} size="large" />
+                <StarIcon key={star} filled={star <= 4} size={24} />
               ))}
             </View>
             <Text style={styles.totalReviews}>Based on 20 reviews</Text>
@@ -181,7 +150,7 @@ const ProductDetailsMainReview = ({ navigation, route }) => {
           {[5, 4, 3, 2, 1].map((rating) => (
             <View key={rating} style={styles.ratingRow}>
               <Text style={styles.ratingNumber}>{rating}</Text>
-              <StarIcon filled={true} />
+              <StarIcon filled={true} size={16} />
               <View style={styles.ratingBarBackground}>
                 <View 
                   style={[
@@ -251,46 +220,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
 
-  // System Bar
-  systemBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 21,
-    paddingTop: 17,
-    height: 39,
-  },
-  systemTime: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000000',
-    fontFamily: 'SF Pro Display',
-    letterSpacing: -0.28,
-  },
-  systemIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  signalIcon: {
-    width: 17,
-    height: 11,
-    backgroundColor: '#000000',
-    borderRadius: 2,
-  },
-  wifiIcon: {
-    width: 15,
-    height: 11,
-    backgroundColor: '#000000',
-    borderRadius: 2,
-  },
-  batteryIcon: {
-    width: 24,
-    height: 11,
-    backgroundColor: '#000000',
-    borderRadius: 2,
-  },
-
   // Header
   header: {
     flexDirection: 'row',
@@ -312,43 +241,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000000',
     fontFamily: 'SF Pro Display',
-  },
-  backIcon: {
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  backArrow: {
-    width: 8,
-    height: 14,
-    borderTopWidth: 2,
-    borderLeftWidth: 2,
-    borderColor: '#000000',
-    transform: [{ rotate: '-45deg' }],
-    marginRight: 2,
-  },
-  searchIcon: {
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  searchCircle: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 2,
-    borderColor: '#000000',
-  },
-  searchHandle: {
-    width: 6,
-    height: 2,
-    backgroundColor: '#000000',
-    position: 'absolute',
-    bottom: 3,
-    right: 3,
-    transform: [{ rotate: '45deg' }],
   },
 
   scrollContainer: {
@@ -441,31 +333,6 @@ const styles = StyleSheet.create({
     color: '#666666',
     width: 20,
     textAlign: 'right',
-  },
-
-  // Star Icons
-  starIcon: {
-    width: 16,
-    height: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  starIconLarge: {
-    width: 20,
-    height: 20,
-  },
-  star: {
-    width: 14,
-    height: 14,
-    backgroundColor: '#E0E0E0',
-    clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
-  },
-  starLarge: {
-    width: 18,
-    height: 18,
-  },
-  starFilled: {
-    backgroundColor: '#FFD700',
   },
 
   // Filter

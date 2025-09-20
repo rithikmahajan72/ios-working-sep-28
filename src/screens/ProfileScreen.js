@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    paddingTop: 80, // Account for top spacing as seen in Figma
+    paddingTop: 80,
   },
   scrollContainer: {
     flex: 1,

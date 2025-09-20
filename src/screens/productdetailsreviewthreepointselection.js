@@ -17,6 +17,12 @@ const ProductDetailsReviewThreePointSelection = ({ navigation, route }) => {
   // Check if all ratings are selected
   const isAllSelected = sizeRating !== null && comfortRating !== null && durabilityRating !== null;
 
+  const handleBackPress = () => {
+    if (navigation) {
+      navigation.navigate('ProductDetailsMainReview');
+    }
+  };
+
   const handleNext = () => {
     // Only proceed if all ratings are selected
     if (!isAllSelected) {
@@ -38,22 +44,25 @@ const ProductDetailsReviewThreePointSelection = ({ navigation, route }) => {
 
   const renderRatingScale = (rating, setRating, labels) => (
     <View style={styles.ratingScale}>
-      {/* Rating dots and lines combined */}
+      {/* Rating dots and lines */}
       <View style={styles.ratingRow}>
         {[0, 1, 2, 3, 4].map((index) => (
-          <React.Fragment key={index}>
-            <TouchableOpacity
-              style={styles.ratingDotContainer}
-              onPress={() => setRating(index)}
-            >
-              <View style={[
-                styles.ratingDot,
-                rating === index && styles.ratingDotSelected
-              ]} />
-            </TouchableOpacity>
-            {index < 4 && <View style={styles.ratingLine} />}
-          </React.Fragment>
+          <TouchableOpacity
+            key={index}
+            style={styles.ratingDotContainer}
+            onPress={() => setRating(index)}
+          >
+            <View style={[
+              styles.ratingDot,
+              rating === index && styles.ratingDotSelected
+            ]} />
+          </TouchableOpacity>
         ))}
+        {/* Connecting lines */}
+        <View style={[styles.ratingLine, { left: 20 }]} />
+        <View style={[styles.ratingLine, { left: 86.75 }]} />
+        <View style={[styles.ratingLine, { left: 153.5 }]} />
+        <View style={[styles.ratingLine, { left: 220.25 }]} />
       </View>
       
       {/* Labels */}
@@ -72,7 +81,7 @@ const ProductDetailsReviewThreePointSelection = ({ navigation, route }) => {
       {/* Header */}
       <View style={styles.header}>
         <GlobalBackButton 
-          navigation={navigation}
+          onPress={handleBackPress}
           style={styles.headerButton}
           iconSize={20}
         />
@@ -150,7 +159,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingTop: 10,
+    paddingBottom: 10,
     backgroundColor: '#F5F5F5',
   },
   headerButton: {
@@ -166,19 +176,20 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     flex: 1,
     letterSpacing: -0.4,
+    fontFamily: 'Montserrat-Medium',
   },
 
   // Product Image
   productImageContainer: {
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 30,
     marginBottom: 40,
   },
   productImage: {
-    width: 120,
-    height: 120,
+    width: 122,
+    height: 123,
+    backgroundColor: '#E5E5E5',
     borderRadius: 8,
-    backgroundColor: '#E0E0E0',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -198,16 +209,17 @@ const styles = StyleSheet.create({
 
   // Rating Container
   ratingContainer: {
-    paddingHorizontal: 40,
-    marginBottom: 40,
+    paddingHorizontal: 31,
+    marginBottom: 35,
   },
   ratingTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#121420',
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: 22,
     letterSpacing: -0.08,
+    fontFamily: 'Montserrat-SemiBold',
   },
 
   // Rating Scale
@@ -218,12 +230,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 20,
-    paddingHorizontal: 10,
+    marginBottom: 14,
+    paddingHorizontal: 0,
+    width: 313,
+    position: 'relative',
   },
   ratingDotContainer: {
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
   },
   ratingDot: {
     width: 17,
@@ -237,23 +252,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#1A1A1A',
   },
   ratingLine: {
-    flex: 1,
+    position: 'absolute',
     height: 1,
     backgroundColor: '#000000',
-    marginHorizontal: 0,
+    width: 51,
+    top: 8,
   },
   ratingLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    paddingHorizontal: 10,
+    width: 313,
+    paddingTop: 10,
   },
   ratingLabelLeft: {
     fontSize: 12,
     fontWeight: '400',
     color: '#000000',
     letterSpacing: -0.06,
+    fontFamily: 'Montserrat-Regular',
   },
   ratingLabelCenter: {
     fontSize: 12,
@@ -263,22 +279,25 @@ const styles = StyleSheet.create({
     left: '50%',
     transform: [{ translateX: -25 }],
     letterSpacing: -0.06,
+    fontFamily: 'Montserrat-Regular',
   },
   ratingLabelRight: {
     fontSize: 12,
     fontWeight: '400',
     color: '#000000',
     letterSpacing: -0.06,
+    fontFamily: 'Montserrat-Regular',
   },
 
-  // Next Button
+    // Next Button
   nextButton: {
     marginHorizontal: 30,
     marginTop: 'auto',
     marginBottom: 40,
-    paddingVertical: 18,
-    borderRadius: 25,
+    height: 48,
     backgroundColor: '#000000',
+    borderRadius: 24,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   nextButtonDisabled: {
@@ -288,6 +307,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
+    letterSpacing: 0,
+    fontFamily: 'Montserrat-SemiBold',
   },
   nextButtonTextDisabled: {
     color: '#999999',

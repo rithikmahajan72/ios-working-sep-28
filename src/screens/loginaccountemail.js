@@ -8,16 +8,20 @@ import {
   TextInput,
   ScrollView,
   Alert,
+  Platform,
 } from 'react-native';
 import GlobalBackButton from '../components/GlobalBackButton';
 import { AppleIcon, GoogleIcon } from '../assets/icons';
 import auth from '@react-native-firebase/auth';
+import appleAuthService from '../services/appleAuthService';
+import googleAuthService from '../services/googleAuthService';
 
 const LoginAccountEmail = ({ navigation }) => {
   const [isEmailSelected, setIsEmailSelected] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleEmailLogin = () => {
     // Basic validation
@@ -30,6 +34,8 @@ const LoginAccountEmail = ({ navigation }) => {
       Alert.alert('Error', 'Please enter your password');
       return;
     }
+
+    setIsLoading(true);
 
     // TODO: Implement actual email login logic
     auth()
@@ -56,6 +62,9 @@ const LoginAccountEmail = ({ navigation }) => {
 
         Alert.alert('Login Error', errorMessage);
         console.error(error);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
@@ -85,14 +94,126 @@ const LoginAccountEmail = ({ navigation }) => {
     }
   };
 
+  const handleSocialLogin = async (provider) => {
+    if (provider === 'apple') {
+      if (Platform.OS !== 'ios') {
+        Alert.alert('Error', 'Apple Sign In is only available on iOS devices');
+        return;
+      }
+
+      if (!appleAuthService.isAppleAuthAvailable()) {
+        Alert.alert('Error', 'Apple Sign In is not available on this device');
+        return;
+      }
+
+      setIsLoading(true);
+      
+      try {
+        console.log('Starting Apple Sign In...');
+        const userCredential = await appleAuthService.signInWithApple();
+        const isNewUser = userCredential.additionalUserInfo?.isNewUser;
+        
+        console.log('Apple Sign In successful, isNewUser:', isNewUser);
+        
+        // Navigate based on user type
+        if (isNewUser) {
+          // First-time user: Show terms and conditions first
+          navigation.navigate('TermsAndConditions', { 
+            previousScreen: 'AppleSignIn',
+            user: userCredential.user,
+            isNewUser: true
+          });
+        } else {
+          // Returning user: Go directly to HomeScreen
+          console.log('Returning user - navigating directly to HomeScreen');
+          navigation.navigate('Home');
+        }
+        
+      } catch (error) {
+        console.error('Apple Sign In error:', error);
+        if (error.message !== 'Apple Sign In was canceled') {
+          Alert.alert('Error', error.message || 'Apple Sign In failed. Please try again.');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    } else if (provider === 'google') {
+      // Check if Google Sign-in is available before proceeding
+      if (!googleAuthService.isAvailable()) {
+        Alert.alert(
+          'Google Sign-in Unavailable', 
+          'Google Sign-in is not available on this device. This may be due to missing Google Play Services or a configuration issue.'
+        );
+        return;
+      }
+
+      setIsLoading(true);
+      
+      try {
+        console.log('Starting Google Sign In for', Platform.OS);
+        
+        // Android-specific pre-check
+        if (Platform.OS === 'android') {
+          console.log('Performing Android-specific Google Sign In checks...');
+          const configCheck = await googleAuthService.checkAndroidConfiguration();
+          
+          if (!configCheck.success) {
+            throw new Error(configCheck.message);
+          }
+          
+          console.log('Android configuration check passed:', configCheck.message);
+        }
+        
+        const userCredential = await googleAuthService.signInWithGoogle();
+        const isNewUser = userCredential.additionalUserInfo?.isNewUser;
+        
+        console.log('Google Sign In successful, isNewUser:', isNewUser);
+        
+        // Navigate based on user type (same logic as Apple Sign In)
+        if (isNewUser) {
+          // First-time user: Show terms and conditions first
+          navigation.navigate('TermsAndConditions', { 
+            previousScreen: 'GoogleSignIn',
+            user: userCredential.user,
+            isNewUser: true
+          });
+        } else {
+          // Returning user: Go directly to Home
+          console.log('Returning user - navigating directly to Home');
+          navigation.navigate('Home');
+        }
+        
+      } catch (error) {
+        console.error('Google Sign In error on', Platform.OS, ':', error);
+        
+        if (error.message !== 'Google Sign In was canceled') {
+          let errorMessage = error.message || 'Google Sign In failed. Please try again.';
+          
+          // Android-specific error messages
+          if (Platform.OS === 'android') {
+            if (error.message?.includes('Google Play Services')) {
+              errorMessage = 'Please update Google Play Services and try again.';
+            } else if (error.message?.includes('network')) {
+              errorMessage = 'Network error. Please check your internet connection and try again.';
+            } else if (error.message?.includes('configuration')) {
+              errorMessage = 'Google Sign In is not properly configured. Please contact support.';
+            }
+          }
+          
+          Alert.alert('Google Sign In Error', errorMessage);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   const handleAppleLogin = () => {
-    // Handle Apple login
-    // Apple login logging removed for production
+    handleSocialLogin('apple');
   };
 
   const handleGoogleLogin = () => {
-    // Handle Google login
-    // Google login logging removed for production
+    handleSocialLogin('google');
   };
 
   return (
@@ -196,8 +317,14 @@ const LoginAccountEmail = ({ navigation }) => {
         </View>
 
         {/* Login Button */}
-        <TouchableOpacity style={styles.loginButton} onPress={handleEmailLogin}>
-          <Text style={styles.loginButtonText}>LOGIN</Text>
+        <TouchableOpacity 
+          style={[styles.loginButton, isLoading && styles.loginButtonDisabled]} 
+          onPress={handleEmailLogin}
+          disabled={isLoading}
+        >
+          <Text style={[styles.loginButtonText, isLoading && styles.loginButtonTextDisabled]}>
+            {isLoading ? 'LOGGING IN...' : 'LOGIN'}
+          </Text>
         </TouchableOpacity>
 
         {/* Divider with "or log in with" */}
@@ -209,10 +336,18 @@ const LoginAccountEmail = ({ navigation }) => {
 
         {/* Social Login Buttons */}
         <View style={styles.socialButtonsContainer}>
-          <TouchableOpacity style={styles.socialButton} onPress={handleAppleLogin}>
+          <TouchableOpacity 
+            style={[styles.socialButton, isLoading && styles.socialButtonDisabled]} 
+            onPress={handleAppleLogin}
+            disabled={isLoading}
+          >
             <AppleIcon width={42} height={42} color="#332218" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.socialButton} onPress={handleGoogleLogin}>
+          <TouchableOpacity 
+            style={[styles.socialButton, isLoading && styles.socialButtonDisabled]} 
+            onPress={handleGoogleLogin}
+            disabled={isLoading}
+          >
             <GoogleIcon width={42} height={42} />
           </TouchableOpacity>
         </View>
@@ -343,6 +478,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  loginButtonDisabled: {
+    backgroundColor: '#CCCCCC',
+  },
   loginButtonText: {
     fontSize: 16,
     fontFamily: 'Montserrat-Bold',
@@ -350,6 +488,9 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     textTransform: 'uppercase',
     lineHeight: 24,
+  },
+  loginButtonTextDisabled: {
+    color: '#999999',
   },
   dividerSection: {
     flexDirection: 'row',
@@ -384,6 +525,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  socialButtonDisabled: {
+    opacity: 0.5,
   },
   footer: {
     alignItems: 'center',

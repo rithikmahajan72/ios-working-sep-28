@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     paddingHorizontal: 20,
-    paddingTop: 30,
+    paddingTop: 16,
   },
   inputContainer: {
     marginBottom: 20,
@@ -797,7 +797,7 @@ const styles = StyleSheet.create({
   },
   modalFormContainer: {
     paddingHorizontal: 20,
-    paddingTop: 30,
+    paddingTop: 16,
   },
   phoneContainer: {
     flexDirection: 'row',

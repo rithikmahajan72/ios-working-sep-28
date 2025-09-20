@@ -320,13 +320,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+    paddingTop: 16, // 16px top padding
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
     paddingHorizontal: Spacing.xl,
-    paddingTop: 54, // Status bar height + padding
+    paddingTop: 16, // Consistent spacing
     paddingBottom: Spacing.lg,
   },
   searchButton: {

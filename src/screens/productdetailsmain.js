@@ -480,14 +480,15 @@ const ProductDetailsMain = ({ navigation, route }) => {
         </View>
       </View>
 
-      <TouchableOpacity 
-        style={styles.viewDetailsContainer}
-        onPress={() => setShowProductDetails(!showProductDetails)}
-      >
-        <Text style={styles.viewDetailsText}>View Product Details</Text>
-        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-          <ShareIcon />
+      <View style={styles.viewDetailsContainer}>
+        <TouchableOpacity onPress={() => setShowProductDetails(!showProductDetails)}>
+          <Text style={styles.viewDetailsText}>View Product Details</Text>
         </TouchableOpacity>
+      </View>
+
+      {/* Share Button - positioned according to Figma */}
+      <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+        <ShareIcon />
       </TouchableOpacity>
 
       <Text style={styles.outOfStockText}>Out of Stock</Text>
@@ -610,7 +611,7 @@ const ProductDetailsMain = ({ navigation, route }) => {
   const renderContentSections = () => (
     <View style={styles.contentContainer}>
       {showProductDetails && (
-        <>
+        <View style={styles.productDetailsContent}>
           <Text style={styles.contentTitle}>Description & Specifications</Text>
           <Text style={styles.contentDescription}>
             The Nike Everyday Plus Cushioned Socks bring comfort to your workout with extra cushioning under the heel and forefoot and a snug, supportive arch band. Sweat-wicking power and breathability up top help keep your feet dry and cool to help push you through that extra set.
@@ -627,17 +628,17 @@ const ProductDetailsMain = ({ navigation, route }) => {
             'shipping',
             'Fabric: 61-67% cotton/30-36% polyester/2% spandex/1% nylon\n\nMachine wash\n\nImported\n\nNote: Material percentages may vary slightly depending on color. Check label for actual content.\n\nShown: Multi-Color\n\nStyle: SX6897-965'
           )}
-        </>
-      )}
 
-      <View style={styles.buyNowContainer}>
-        <TouchableOpacity 
-          style={styles.buyNowButton}
-          onPress={() => setShowSizeModal(true)}
-        >
-          <Text style={styles.buyNowText}>Buy Now</Text>
-        </TouchableOpacity>
-      </View>
+          <View style={styles.buyNowContainer}>
+            <TouchableOpacity 
+              style={styles.buyNowButton}
+              onPress={() => setShowSizeModal(true)}
+            >
+              <Text style={styles.buyNowText}>Buy Now</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       {/* Size and Fit Section - Always visible */}
       {renderSizeAndFitSection()}
@@ -720,23 +721,20 @@ const ProductDetailsMain = ({ navigation, route }) => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
-      {/* System Bar - removed extra icons above header as per Figma */}
-      <View style={styles.systemBar}>
-        {/* Removed 9:41 text as per Figma */}
-      </View>
-
-      {/* Header */}
-      <View style={styles.header}>
-        <GlobalBackButton 
-          navigation={navigation}
-          style={styles.headerButton}
-          iconColor="#000000"
-          iconSize={24}
-          onPress={handleCustomBackPress}
-        />
+      {/* Control Bar Header - matching Figma exactly */}
+      <View style={styles.controlBar}>
+        <View style={styles.headerButtonContainer}>
+          <GlobalBackButton 
+            navigation={navigation}
+            style={styles.headerButton}
+            iconColor="#000000"
+            iconSize={24}
+            onPress={handleCustomBackPress}
+          />
+        </View>
         <Text style={styles.headerTitle}>Nike Everyday Plus Cush...</Text>
       </View>
 
@@ -777,7 +775,7 @@ const ProductDetailsMain = ({ navigation, route }) => {
         setActiveSize={setActiveSize}
         navigation={navigation}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -787,60 +785,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
 
-  // System Bar
-  systemBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 21,
-    paddingTop: 17,
-    height: 39,
-  },
-  systemTime: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000000',
-    fontFamily: 'SF Pro Display',
-    letterSpacing: -0.28,
-  },
-  systemIcons: {
+  // Control Bar (Header)
+  controlBar: {
+    backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-  },
-  signalIcon: {
-    width: 17,
-    height: 11,
-    backgroundColor: '#000000',
-  },
-  wifiIcon: {
-    width: 15,
-    height: 11,
-    backgroundColor: '#000000',
-  },
-  batteryIcon: {
-    width: 25,
-    height: 13,
-    backgroundColor: '#000000',
-    borderRadius: 2,
-  },
-
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingTop: 54,
     paddingBottom: 12,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 0,
+    gap: 8,
   },
-  headerButton: {
+  headerButtonContainer: {
     width: 68,
     alignItems: 'flex-start',
-    paddingVertical: 8,
-    paddingLeft: 0,
+  },
+  headerButton: {
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitle: {
     flex: 1,
@@ -850,7 +813,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'Montserrat-Medium',
     letterSpacing: -0.4,
-    marginRight: 68,
+    lineHeight: 19.2,
   },
 
   scrollContainer: {
@@ -1001,9 +964,9 @@ const styles = StyleSheet.create({
 
   // Product Info
   productInfoContainer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
     paddingTop: 35,
-    paddingBottom: 35,
+    paddingBottom: 16,
     height: 246,
   },
   productDescription: {
@@ -1016,6 +979,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-Regular',
     letterSpacing: -0.4,
     marginBottom: 6,
+    lineHeight: 19.2,
   },
   productTitle: {
     fontSize: 28,
@@ -1028,8 +992,12 @@ const styles = StyleSheet.create({
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 37,
+    marginBottom: 16,
     gap: 8,
+    position: 'absolute',
+    top: 106,
+    left: 16,
+    width: 327,
   },
   originalPrice: {
     fontSize: 20,
@@ -1038,31 +1006,37 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-Medium',
     textDecorationLine: 'line-through',
     letterSpacing: -0.5,
+    lineHeight: 24,
   },
   discountedPriceContainer: {
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
+    marginLeft: 8,
   },
   redBannerContainer: {
     position: 'absolute',
     zIndex: 1,
+    transform: [{ rotate: '-2.12758deg' }],
   },
   discountedPrice: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#000000',
     fontFamily: 'Montserrat-SemiBold',
     letterSpacing: -0.5,
     zIndex: 2,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    lineHeight: 24,
   },
   viewDetailsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 13,
+    justifyContent: 'center',
+    position: 'absolute',
+    top: 200,
+    left: 0,
+    right: 0,
+    transform: [{ translateY: -50 }],
   },
   viewDetailsText: {
     fontSize: 20,
@@ -1071,11 +1045,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-Medium',
     textDecorationLine: 'underline',
     textAlign: 'center',
-    flex: 1,
+    lineHeight: 24,
   },
   shareButton: {
     position: 'absolute',
-    right: 0,
+    right: 16,
+    top: 187,
     padding: 0,
     width: 24,
     height: 24,
@@ -1085,17 +1060,24 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#848688',
     fontFamily: 'Montserrat-Medium',
-    textAlign: 'center',
     position: 'absolute',
-    bottom: -3,
+    top: -3,
     left: 150,
+    lineHeight: 14.4,
+  },
+
+  // Product Details Content
+  productDetailsContent: {
+    paddingHorizontal: 16,
+    paddingTop: 30,
+    paddingBottom: 32,
   },
 
   // Expandable Sections
   expandableSectionContainer: {
     borderTopWidth: 1,
     borderTopColor: '#E4E4E4',
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
     paddingVertical: 37,
   },
   sectionHeader: {
@@ -1130,7 +1112,7 @@ const styles = StyleSheet.create({
 
   // Rating Bars
   ratingBarsContainer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
     paddingVertical: 24,
     borderTopWidth: 1,
     borderTopColor: '#E4E4E4',
@@ -1181,7 +1163,7 @@ const styles = StyleSheet.create({
 
   // Rating Section
   ratingSectionContainer: {
-    paddingHorizontal: 22,
+    paddingHorizontal: 16,
     paddingVertical: 20,
   },
   ratingSectionTitle: {
@@ -1245,7 +1227,7 @@ const styles = StyleSheet.create({
 
   // Content
   contentContainer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
     paddingVertical: 30,
   },
   contentTitle: {
@@ -1267,7 +1249,7 @@ const styles = StyleSheet.create({
   },
   buyNowContainer: {
     paddingVertical: 32,
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
   },
   buyNowButton: {
     backgroundColor: '#000000',
@@ -1287,7 +1269,7 @@ const styles = StyleSheet.create({
 
   // Related Products
   relatedProductsContainer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
     paddingVertical: 38,
   },
   relatedProductsTitle: {
@@ -1332,7 +1314,7 @@ const styles = StyleSheet.create({
   // Scrollable Products Sections
   scrollableProductsContainer: {
     marginBottom: 38,
-    paddingLeft: 24,
+    paddingLeft: 16,
   },
   scrollableProductsTitle: {
     fontSize: 20,
@@ -1341,10 +1323,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-Medium',
     lineHeight: 24,
     marginBottom: 38,
-    paddingRight: 24,
+    paddingRight: 16,
   },
   horizontalList: {
-    paddingRight: 24,
+    paddingRight: 16,
     gap: 6,
   },
   productCard: {

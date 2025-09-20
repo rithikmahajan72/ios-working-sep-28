@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: '#FFFFFF',
-    paddingTop: Platform.OS === 'ios' ? 54 : 30,
+    paddingTop: 16,
   },
   backButtonContainer: {
     width: 68,
