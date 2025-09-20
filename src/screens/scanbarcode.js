@@ -11,7 +11,11 @@ import {
   Modal,
   TextInput,
   Easing,
+  Alert,
+  Platform,
 } from 'react-native';
+import { RNCamera } from 'react-native-camera';
+import { request, check, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { Colors, FontSizes, FontWeights, Spacing, BorderRadius } from '../constants';
 import { GlobalBackButton } from '../components';
 
@@ -170,8 +174,13 @@ const ManualProductNumberScreen = ({ navigation }) => {
 // Camera Scanning Screen
 const CameraScanningScreen = ({ navigation }) => {
   const slideAnim = useRef(new Animated.Value(width)).current;
+  const [isScanning, setIsScanning] = useState(true);
+  const [hasPermission, setHasPermission] = useState(null);
 
   useEffect(() => {
+    // Request camera permissions when component mounts
+    requestCameraPermission();
+    
     Animated.timing(slideAnim, {
       toValue: 0,
       duration: 300,
@@ -179,6 +188,25 @@ const CameraScanningScreen = ({ navigation }) => {
       useNativeDriver: true,
     }).start();
   }, [slideAnim]);
+
+  const requestCameraPermission = async () => {
+    try {
+      const permission = Platform.OS === 'ios' 
+        ? PERMISSIONS.IOS.CAMERA 
+        : PERMISSIONS.ANDROID.CAMERA;
+      
+      const result = await request(permission);
+      
+      if (result === RESULTS.GRANTED) {
+        setHasPermission(true);
+      } else {
+        setHasPermission(false);
+      }
+    } catch (error) {
+      console.log('Camera permission error:', error);
+      setHasPermission(false);
+    }
+  };
 
   const handleGoBack = () => {
     Animated.timing(slideAnim, {
@@ -202,6 +230,62 @@ const CameraScanningScreen = ({ navigation }) => {
     });
   };
 
+  const onBarcodeRead = (e) => {
+    if (isScanning) {
+      setIsScanning(false);
+      
+      // Handle successful scan
+      console.log('Scanned barcode:', e.data);
+      
+      // You can add logic here to process the scanned barcode
+      // For now, let's show an alert and navigate back
+      setTimeout(() => {
+        Alert.alert(
+          'Barcode Scanned',
+          `Code: ${e.data}`,
+          [
+            {
+              text: 'Scan Again',
+              onPress: () => {
+                setIsScanning(true);
+              }
+            },
+            {
+              text: 'Use This Code',
+              onPress: () => {
+                // Navigate to product details or search with this code
+                navigation.navigate('SearchScreen', { scannedCode: e.data });
+              }
+            }
+          ]
+        );
+      }, 100);
+    }
+  };
+
+  if (hasPermission === null) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.permissionContainer}>
+          <Text style={styles.permissionText}>Requesting camera permission...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (hasPermission === false) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.permissionContainer}>
+          <Text style={styles.permissionText}>No access to camera</Text>
+          <TouchableOpacity style={styles.permissionButton} onPress={requestCameraPermission}>
+            <Text style={styles.permissionButtonText}>Request Permission</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
@@ -217,29 +301,47 @@ const CameraScanningScreen = ({ navigation }) => {
           <GlobalBackButton navigation={navigation} style={styles.cameraBackButton} onPress={handleGoBack} iconColor="#FFFFFF" />
         </View>
 
-        {/* Camera Frame */}
+        {/* Camera Scanner */}
         <View style={styles.cameraContent}>
           <Text style={styles.cameraInstruction}>Fit the code within the frame of the screen</Text>
           
-          <View style={styles.scanFrame}>
-            <View style={styles.scanArea} />
-            <View style={styles.zoomControls}>
-              <Text style={styles.zoomText}>1X</Text>
-              <Text style={styles.zoomText}>1.5X</Text>
-              <Text style={styles.zoomText}>2X</Text>
+          <RNCamera
+            ref={ref => { this.camera = ref; }}
+            style={styles.cameraView}
+            type={RNCamera.Constants.Type.back}
+            flashMode={RNCamera.Constants.FlashMode.on}
+            androidCameraPermissionOptions={{
+              title: 'Permission to use camera',
+              message: 'We need your permission to use your camera',
+              buttonPositive: 'Ok',
+              buttonNegative: 'Cancel',
+            }}
+            onBarCodeRead={onBarcodeRead}
+            barCodeTypes={[RNCamera.Constants.BarCodeType.qr, RNCamera.Constants.BarCodeType.ean13, RNCamera.Constants.BarCodeType.ean8]}
+          >
+            <View style={styles.overlay}>
+              <View style={styles.unfocusedContainer} />
+              <View style={styles.middleContainer}>
+                <View style={styles.unfocusedContainer} />
+                <View style={styles.focusedContainer}>
+                  <View style={styles.markerContainer}>
+                    <View style={[styles.marker, styles.topLeft]} />
+                    <View style={[styles.marker, styles.topRight]} />
+                    <View style={[styles.marker, styles.bottomLeft]} />
+                    <View style={[styles.marker, styles.bottomRight]} />
+                  </View>
+                </View>
+                <View style={styles.unfocusedContainer} />
+              </View>
+              <View style={styles.unfocusedContainer} />
             </View>
-          </View>
-          
-          <Text style={styles.scanResult}>
-            A successful scan will show the results on{'\n'}
-            the screen
-          </Text>
+          </RNCamera>
         </View>
 
-        {/* Product Number Button */}
-        <View style={styles.cameraButtonContainer}>
+        {/* Bottom Button */}
+        <View style={styles.bottomButtonContainer}>
           <TouchableOpacity style={styles.productNumberButton} onPress={handleProductNumber}>
-            <Text style={styles.productNumberButtonText}>Product Number</Text>
+            <Text style={styles.productNumberButtonText}>Enter Product Number Manually</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -669,6 +771,115 @@ const styles = StyleSheet.create({
     fontWeight: FontWeights.medium,
     color: Colors.background,
     textAlign: 'center',
+  },
+  // Camera Scanner Styles
+  cameraView: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  unfocusedContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  },
+  middleContainer: {
+    flexDirection: 'row',
+    flex: 1.5,
+  },
+  focusedContainer: {
+    flex: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  markerContainer: {
+    width: 250,
+    height: 250,
+    position: 'relative',
+  },
+  marker: {
+    position: 'absolute',
+    borderColor: '#FFFFFF',
+    borderWidth: 3,
+    width: 40,
+    height: 40,
+  },
+  topLeft: {
+    top: 0,
+    left: 0,
+    borderTopWidth: 3,
+    borderLeftWidth: 3,
+    borderRightWidth: 0,
+    borderBottomWidth: 0,
+  },
+  topRight: {
+    top: 0,
+    right: 0,
+    borderTopWidth: 3,
+    borderRightWidth: 3,
+    borderLeftWidth: 0,
+    borderBottomWidth: 0,
+  },
+  bottomLeft: {
+    bottom: 0,
+    left: 0,
+    borderBottomWidth: 3,
+    borderLeftWidth: 3,
+    borderTopWidth: 0,
+    borderRightWidth: 0,
+  },
+  bottomRight: {
+    bottom: 0,
+    right: 0,
+    borderBottomWidth: 3,
+    borderRightWidth: 3,
+    borderTopWidth: 0,
+    borderLeftWidth: 0,
+  },
+  bottomButtonContainer: {
+    position: 'absolute',
+    bottom: 50,
+    left: 0,
+    right: 0,
+    paddingHorizontal: Spacing.lg,
+  },
+  centerText: {
+    flex: 1,
+    fontSize: 18,
+    padding: 32,
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  // Permission Styles
+  permissionContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000000',
+  },
+  permissionText: {
+    fontSize: 18,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  permissionButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  permissionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

@@ -13,7 +13,11 @@ import {
   StatusBar,
   SafeAreaView,
   ScrollView,
+  PermissionsAndroid,
+  Platform,
 } from 'react-native';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { Colors, FontSizes, FontWeights, Spacing, BorderRadius } from '../constants';
 import { MicrophoneIcon, CameraIcon, ScanBarcodeIcon, SearchIcon } from '../assets/icons';
 import { useAccessibility } from '../hooks/useAccessibility';
@@ -231,14 +235,98 @@ const SearchScreen = React.memo(({ navigation, onClose, route }) => {
     }
   };
 
-  const handleTakePhoto = () => {
-    Alert.alert('Camera', 'Take photo functionality would be implemented here');
-    handleCloseCameraModal();
+  const handleTakePhoto = async () => {
+    console.log('handleTakePhoto called');
+    Alert.alert('Debug', 'Take Photo button pressed');
+    
+    try {
+      // Request camera permission on iOS
+      if (Platform.OS === 'ios') {
+        const permission = await request(PERMISSIONS.IOS.CAMERA);
+        console.log('iOS Camera permission result:', permission);
+        
+        if (permission !== RESULTS.GRANTED) {
+          Alert.alert('Permission Denied', 'Camera permission is required to take photos');
+          return;
+        }
+      }
+      
+      const options = {
+        mediaType: 'photo',
+        includeBase64: false,
+        maxHeight: 2000,
+        maxWidth: 2000,
+        quality: 0.8,
+      };
+
+      console.log('Launching camera with options:', options);
+      
+      launchCamera(options, (response) => {
+        console.log('Camera response:', response);
+        if (response.didCancel) {
+          console.log('User cancelled camera');
+          Alert.alert('Info', 'Camera cancelled');
+        } else if (response.errorMessage) {
+          console.log('Camera error:', response.errorMessage);
+          Alert.alert('Camera Error', response.errorMessage);
+        } else if (response.assets && response.assets[0]) {
+          const imageUri = response.assets[0].uri;
+          console.log('Photo taken:', imageUri);
+          // You can handle the image here - upload to server, show preview, etc.
+          Alert.alert('Photo Captured', 'Photo has been taken successfully!');
+          handleCloseCameraModal();
+        }
+      });
+    } catch (error) {
+      console.log('Error requesting camera permission:', error);
+      Alert.alert('Error', 'Failed to request camera permission');
+    }
   };
 
-  const handleChooseFromLibrary = () => {
-    Alert.alert('Photo Library', 'Choose from library functionality would be implemented here');
-    handleCloseCameraModal();
+  const handleChooseFromLibrary = async () => {
+    console.log('handleChooseFromLibrary called');
+    
+    try {
+      // Request photo library permission on iOS
+      if (Platform.OS === 'ios') {
+        const permission = await request(PERMISSIONS.IOS.PHOTO_LIBRARY);
+        console.log('iOS Photo Library permission result:', permission);
+        
+        if (permission !== RESULTS.GRANTED) {
+          Alert.alert('Permission Denied', 'Photo library permission is required to select photos');
+          return;
+        }
+      }
+      
+      const options = {
+        mediaType: 'photo',
+        includeBase64: false,
+        maxHeight: 2000,
+        maxWidth: 2000,
+        quality: 0.8,
+      };
+
+      console.log('Launching image library with options:', options);
+
+      launchImageLibrary(options, (response) => {
+        console.log('Image library response:', response);
+        if (response.didCancel) {
+          console.log('User cancelled photo library');
+        } else if (response.errorMessage) {
+          console.log('Library error:', response.errorMessage);
+          Alert.alert('Library Error', response.errorMessage);
+        } else if (response.assets && response.assets[0]) {
+          const imageUri = response.assets[0].uri;
+          console.log('Photo selected:', imageUri);
+          // You can handle the image here - upload to server, show preview, etc.
+          Alert.alert('Photo Selected', 'Photo has been selected successfully!');
+          handleCloseCameraModal();
+        }
+      });
+    } catch (error) {
+      console.log('Error requesting photo library permission:', error);
+      Alert.alert('Error', 'Failed to request photo library permission');
+    }
   };
 
   const renderSuggestionItem = ({ item }) => (
@@ -510,36 +598,49 @@ const SearchScreen = React.memo(({ navigation, onClose, route }) => {
         onRequestClose={handleCloseCameraModal}
       >
         <View style={styles.modalOverlay}>
-          <Animated.View 
-            style={[
-              styles.cameraModal,
-              { transform: [{ translateY: modalSlideAnim }] }
-            ]}
-          >
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Search with an image</Text>
-              <Text style={styles.modalDescription}>
-                By confirming the photo, you confirm that you own the photo and have the right to send it to us. You also consent that we may use this image as it may contain personal information
-              </Text>
-              
-              <TouchableOpacity style={styles.modalButton} onPress={handleTakePhoto}>
-                <Text style={styles.modalButtonText}>Take Photo</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.modalButtonSecondary]} 
-                onPress={handleChooseFromLibrary}
-              >
-                <Text style={[styles.modalButtonText, styles.modalButtonSecondaryText]}>
-                  Choose From Library
+          <View style={styles.modalContainer}>
+            {/* Main Modal Content */}
+            <Animated.View 
+              style={[
+                styles.cameraModal,
+                { transform: [{ translateY: modalSlideAnim }] }
+              ]}
+            >
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Search with an image</Text>
+                <Text style={styles.modalDescription}>
+                  By confirming the photo, you confirm that you own the photo and have the right to send it to us. You also consent that we may use this image as it may contain personal information
                 </Text>
-              </TouchableOpacity>
+              </View>
               
+              <View style={styles.modalButtonContainer}>
+                <TouchableOpacity style={styles.modalButton} onPress={handleTakePhoto}>
+                  <Text style={styles.modalButtonText}>Take Photo</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.modalButton, styles.modalButtonLast]} 
+                  onPress={handleChooseFromLibrary}
+                >
+                  <Text style={styles.modalButtonSecondaryText}>
+                    Choose From Library
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+            
+            {/* Cancel Button - Separate Container */}
+            <Animated.View 
+              style={[
+                styles.modalCancelContainer,
+                { transform: [{ translateY: modalSlideAnim }] }
+              ]}
+            >
               <TouchableOpacity style={styles.modalCancelButton} onPress={handleCloseCameraModal}>
                 <Text style={styles.modalCancelText}>Cancel</Text>
               </TouchableOpacity>
-            </View>
-          </Animated.View>
+            </Animated.View>
+          </View>
         </View>
       </Modal>
     </SafeAreaView>
@@ -847,62 +948,93 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     justifyContent: 'flex-end',
   },
-  cameraModal: {
-    backgroundColor: Colors.background,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    minHeight: 300,
+  modalContainer: {
+    paddingHorizontal: 12,
+    paddingBottom: 34, // Safe area bottom
   },
-  modalContent: {
-    padding: Spacing.xl,
+  cameraModal: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 14,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 0.33,
+    borderBottomColor: 'rgba(128, 128, 128, 0.55)',
     alignItems: 'center',
   },
   modalTitle: {
-    fontSize: FontSizes.lg,
-    fontWeight: FontWeights.semiBold,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.md,
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#3D3D3D',
     textAlign: 'center',
+    letterSpacing: -0.08,
+    lineHeight: 18,
+    marginBottom: 4,
   },
   modalDescription: {
-    fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '400',
+    color: '#3D3D3D',
     textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: Spacing.xl,
+    letterSpacing: -0.08,
+    lineHeight: 18,
+  },
+  modalButtonContainer: {
+    overflow: 'hidden',
   },
   modalButton: {
-    width: '100%',
-    backgroundColor: Colors.info,
-    paddingVertical: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    marginBottom: Spacing.md,
+    height: 56,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderBottomWidth: 0.33,
+    borderBottomColor: 'rgba(128, 128, 128, 0.55)',
   },
-  modalButtonSecondary: {
-    backgroundColor: Colors.backgroundSecondary,
-    borderWidth: 1,
-    borderColor: Colors.border,
+  modalButtonLast: {
+    borderBottomWidth: 0,
   },
   modalButtonText: {
-    fontSize: FontSizes.md,
-    fontWeight: FontWeights.medium,
-    color: Colors.background,
-    textAlign: 'center',
+    fontSize: 17,
+    fontWeight: '400',
+    color: '#007AFF',
+    letterSpacing: -0.43,
+    lineHeight: 22,
   },
   modalButtonSecondaryText: {
-    color: Colors.textPrimary,
+    fontSize: 17,
+    fontWeight: '400',
+    color: '#AEAEB2',
+    letterSpacing: -0.43,
+    lineHeight: 22,
+  },
+  modalButtonSeparator: {
+    height: 0.33,
+    backgroundColor: 'rgba(128, 128, 128, 0.55)',
+  },
+  modalCancelContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 14,
+    height: 56,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalCancelButton: {
-    paddingVertical: Spacing.md,
-    marginTop: Spacing.sm,
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalCancelText: {
-    fontSize: FontSizes.md,
-    color: Colors.info,
-    fontWeight: FontWeights.medium,
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#007AFF',
+    letterSpacing: -0.43,
+    lineHeight: 22,
   },
 });
 
