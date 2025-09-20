@@ -8,6 +8,9 @@ const path = require('path');
  * @type {import('@react-native/metro-config').MetroConfig}
  */
 const config = {
+  server: {
+    port: 5000,
+  },
   watchFolders: [],
   resolver: {
     blockList: [

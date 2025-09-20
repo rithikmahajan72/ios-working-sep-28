@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   },
   section: {
     paddingHorizontal: 20,
-    paddingTop: 32,
+    paddingTop: 16,
     paddingBottom: 24,
     backgroundColor: '#FFFFFF',
   },
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     paddingHorizontal: 20,
-    paddingTop: 32,
+    paddingTop: 16,
     paddingBottom: 24,
     gap: 16,
   },

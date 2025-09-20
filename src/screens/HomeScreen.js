@@ -175,6 +175,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+    paddingTop: 16, // 16px top padding
   },
   
   // Header Styles
@@ -183,7 +184,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 54, // Match Figma spacing
+    paddingTop: 16, // Consistent spacing
     paddingBottom: 12,
     backgroundColor: '#FFFFFF',
   },
@@ -226,11 +227,11 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   firstTab: {
-    paddingLeft: 0,
+    paddingLeft: 16,
   },
   eyxTab: {
     position: 'absolute',
-    right: 16, // Position to the right edge
+    right: 16, // Position to the right edge with 16px padding
     top: 12,
     paddingHorizontal: 16,
     paddingTop: 0,

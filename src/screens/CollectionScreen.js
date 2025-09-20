@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 54,
+    paddingTop: 16,
     paddingBottom: 16,
     backgroundColor: '#FFFFFF',
   },
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
   tab: {
-    paddingHorizontal: 32,
+    paddingHorizontal: 16,
     paddingVertical: 9,
     marginRight: 16,
     borderWidth: 1,
@@ -481,12 +481,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-Regular',
   },
   productsContainer: {
-    paddingHorizontal: 0,
-    paddingTop: 40,
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
   productRow: {
     justifyContent: 'flex-start',
-    paddingHorizontal: 0,
+    paddingHorizontal: 16,
     marginBottom: 40,
     gap: 6,
   },
@@ -551,7 +551,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   productInfo: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingTop: 14,
     paddingBottom: 0,
     width: '100%',
@@ -614,7 +614,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   filterHeader: {
-    paddingHorizontal: Spacing.xl,
+    paddingHorizontal: 16,
     paddingBottom: Spacing.lg,
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
@@ -626,7 +626,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   filterContent: {
-    paddingHorizontal: Spacing.xl,
+    paddingHorizontal: 16,
     maxHeight: SCREEN_HEIGHT * 0.6,
   },
   filterSection: {
@@ -767,7 +767,8 @@ const styles = StyleSheet.create({
     color: '#666666',
   },
   viewResultsButton: {
-    margin: Spacing.xl,
+    marginHorizontal: 16,
+    marginVertical: Spacing.xl,
     paddingVertical: Spacing.lg,
     backgroundColor: '#000000',
     borderRadius: BorderRadius.md,

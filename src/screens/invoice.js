@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 12,
     backgroundColor: '#FFFFFF',
-    paddingTop: Platform.OS === 'ios' ? 54 : 30,
+    paddingTop: 16,
     borderBottomWidth: 0,
     overflow: 'hidden',
   },

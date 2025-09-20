@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md || 12,
     borderBottomWidth: 1,
     borderBottomColor: Colors.borderLight || '#E5E5E5',
-    paddingTop: 54,
+    paddingTop: 16,
   },
   backButton: {
     padding: Spacing.sm || 8,

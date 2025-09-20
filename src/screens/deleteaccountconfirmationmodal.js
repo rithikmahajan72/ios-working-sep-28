@@ -11,9 +11,9 @@ import { FontSizes, FontWeights, Spacing } from '../constants/styles';
 const DeleteAccountConfirmationModal = ({ navigation, visible, onClose }) => {
   const handleDone = () => {
     onClose && onClose();
-    // Navigate to Home screen after confirming deletion
+    // Navigate to RewardsScreen after confirming deletion
     if (navigation && navigation.navigate) {
-      navigation.navigate('Home');
+      navigation.navigate('Rewards');
     }
   };
 

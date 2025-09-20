@@ -566,7 +566,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingBottom: 12,
-    paddingTop: 54,
+    paddingTop: 16,
     gap: 21,
   },
   searchIcon: {
@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
   micButtonAbsolute: {
     position: 'absolute',
     left: 262,
-    top: 56,
+    top: 28,
     width: 20,
     height: 20,
     justifyContent: 'center',
