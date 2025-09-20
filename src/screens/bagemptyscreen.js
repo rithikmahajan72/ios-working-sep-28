@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from 'react-native';
-import ShoppingBagIcon from '../assets/icons/ShoppingBagIcon';
+import BagIconSvg from '../assets/icons/BagIconSvg';
 import GlobalBackButton from '../components/GlobalBackButton';
 import { useBag } from '../contexts/BagContext';
 
@@ -53,14 +53,12 @@ const BagEmptyScreen = React.memo(({ navigation }) => {
         </View>
 
         {/* Content */}
-        <View style={styles.content}>
+          <View style={styles.content}>
           <View style={styles.bagIconContainer}>
             <View style={styles.bagIconCircle}>
-              <ShoppingBagIcon size={35} color="#000000" />
+              <BagIconSvg size={35} color="#000000" />
             </View>
-          </View>
-
-          <View style={styles.textContainer}>
+          </View>          <View style={styles.textContainer}>
             <Text style={styles.emptyText}>
               You have {bagItemsCount} item{bagItemsCount > 1 ? 's' : ''} in your <Text style={styles.boldText}>bag</Text>!
             </Text>
@@ -108,7 +106,7 @@ const BagEmptyScreen = React.memo(({ navigation }) => {
       <View style={styles.content}>
         <View style={styles.bagIconContainer}>
           <View style={styles.bagIconCircle}>
-            <ShoppingBagIcon size={27} color="#000000" />
+            <BagIconSvg size={27} color="#000000" />
           </View>
         </View>
 

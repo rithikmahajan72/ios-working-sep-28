@@ -8,8 +8,7 @@ import {
 } from 'react-native';
 import GlobalSearchIcon from '../assets/icons/GlobalSearchIcon';
 import NewIcon from '../assets/icons/NewIcon';
-import ShoppingBagIcon from '../assets/icons/ShoppingBagIcon';
-import EYXIcon from '../assets/icons/EYXIcon';
+import NewShoppingBagIcon from '../assets/icons/NewShoppingBagIcon';
 import RightArrowIcon from '../assets/icons/RightArrowIcon';
 
 const HomeScreen = React.memo(({ navigation }) => {
@@ -54,7 +53,10 @@ const HomeScreen = React.memo(({ navigation }) => {
   const renderCategoryItem = useCallback((item) => (
     <TouchableOpacity 
       key={item.id} 
-      style={styles.categoryItem}
+      style={[
+        styles.categoryItem,
+        item.name === 'Golf' && styles.lastCategoryItem
+      ]}
       onPress={handleNavigateToProduct}
       accessibilityRole="button"
       accessibilityLabel={`${item.name} category${item.isSale ? ' - On Sale' : ''}`}
@@ -103,7 +105,7 @@ const HomeScreen = React.memo(({ navigation }) => {
             accessibilityLabel="Shopping bag"
             accessibilityHint="Navigate to shopping bag"
           >
-            <ShoppingBagIcon size={24} color="#000000" />
+            <NewShoppingBagIcon size={24} color="#000000" />
           </TouchableOpacity>
         </View>
       </View>
@@ -134,31 +136,6 @@ const HomeScreen = React.memo(({ navigation }) => {
             </TouchableOpacity>
           ))}
         </View>
-        
-        {/* Separate E⚡X Tab positioned to the right */}
-        <TouchableOpacity
-          style={[
-            styles.eyxTab,
-            activeTab === 'E⚡X' && styles.activeTab
-          ]}
-          onPress={() => handleTabPress('E⚡X')}
-          accessibilityRole="tab"
-          accessibilityLabel="E-X exclusive tab"
-          accessibilityState={{ selected: activeTab === 'E⚡X' }}
-        >
-          <View style={styles.eyxTabContent}>
-            <Text style={[
-              styles.tabText,
-              activeTab === 'E⚡X' && styles.activeTabText
-            ]}>
-              E
-            </Text>
-            <View style={styles.eyxIconContainer}>
-              <EYXIcon size={16} color={activeTab === 'E⚡X' ? '#000000' : '#767676'} />
-            </View>
-          </View>
-          {activeTab === 'E⚡X' && <View style={styles.tabIndicator} />}
-        </TouchableOpacity>
       </View>
 
       {/* Content */}
@@ -229,25 +206,9 @@ const styles = StyleSheet.create({
   firstTab: {
     paddingLeft: 16,
   },
-  eyxTab: {
-    position: 'absolute',
-    right: 16, // Position to the right edge with 16px padding
-    top: 12,
-    paddingHorizontal: 16,
-    paddingTop: 0,
-    paddingBottom: 16,
-  },
   tabContent: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  eyxTabContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  eyxIconContainer: {
-    marginLeft: 2,
-    marginTop: -2, // Slight adjustment for better visual alignment
   },
   activeTab: {
     // Active tab styling handled by indicator
@@ -288,6 +249,9 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E4E4E4',
+  },
+  lastCategoryItem: {
+    borderBottomWidth: 0,
   },
   categoryImageContainer: {
     marginRight: 16,

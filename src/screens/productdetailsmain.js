@@ -459,6 +459,20 @@ const ProductDetailsMain = ({ navigation, route }) => {
             <ShoppingBagIcon />
           </View>
         </TouchableOpacity>
+
+        {/* AI Try-On Button */}
+        <TouchableOpacity 
+          style={styles.aiTryOnButton}
+          onPress={() => {
+            console.log('AI Try-On pressed');
+            navigation?.navigate('TryOnProTips', { 
+              product: currentProduct,
+              previousScreen: 'ProductDetailsMain' 
+            });
+          }}
+        >
+          <Text style={styles.aiTryOnButtonText}>Try On</Text>
+        </TouchableOpacity>
       </View>
     );
   };
@@ -888,6 +902,31 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  aiTryOnButton: {
+    position: 'absolute',
+    bottom: 20,
+    left: '50%',
+    transform: [{ translateX: -40 }], // Half of button width to center
+    backgroundColor: '#000000',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  aiTryOnButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'Montserrat-SemiBold',
+    textAlign: 'center',
   },
 
   // Star Rating

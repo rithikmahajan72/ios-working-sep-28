@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import BottomNavigationBar from './bottomnavigationbar';
 import { Colors, FontSizes, FontWeights, Spacing } from '../constants';
-import { HomeScreen, FavouritesScreen, FavouritesContent, FavouritesContentEditView, FavouritesModalOverlayForSizeSelection, FavouritesAddedToBagConfirmationModal, FavouritesSizeChartReference, ShopScreen, CollectionScreen, FiltersScreen, SearchScreen, ScanBarcodeFlow, RewardsScreen, ProfileScreen, BagScreen, BagEmptyScreen, BagContent, CreateAccountMobileNumber, CreateAccountEmail, CreateAccountEmailSuccessModal, CreateAccountMobileNumberVerification, CreateAccountMobileNumberAccountCreatedConfirmationModal, LoginAccountMobileNumber, LoginAccountEmail, ForgotLoginPassword, ForgotLoginPasswordVerificationCode, ForgotLoginPasswordCreateNewPassword, ForgotLoginPasswordConfirmationModal, LoginAccountMobileNumberVerificationCode, LoginAccountEmailVerificationCode, TermsAndConditions, PreferenceSelector, OrdersScreen, EditProfile, SettingsScreen, DeliveryAddressesSettings, CommunicationPreferences, LinkedAccountScreen, DeleteAccount, DeleteAccountConfirmation, ProfileVisibilityScreen, ContactUsScreen, InvoiceScreen, InvoiceDetails, LoveUsRateUs, FAQScreen, ProductViewOne, ProductViewTwo, ProductViewThree, ProductDetailsMain, ProductDetailsMainReview, ProductDetailsReviewThreePointSelection, ProductDetailsWrittenUserReview, DeliveryOptionsStepOneScreen, Language, Region, MembersExclusive, PointsHistory, InviteAFriend, OrdersReturnExchange, OrdersExchangeSizeSelectionChart, OrdersCancelOrderModal, OrdersReturnRequest, OrdersReturnAcceptedModal, Inbox, OrderConfirmationPhone, DeliveryOptionsStepFourIfCustomRequired } from '../screens';
+import { HomeScreen, FavouritesScreen, FavouritesContent, FavouritesContentEditView, FavouritesModalOverlayForSizeSelection, FavouritesAddedToBagConfirmationModal, FavouritesSizeChartReference, ShopScreen, CollectionScreen, FiltersScreen, SearchScreen, ScanBarcodeFlow, RewardsScreen, ProfileScreen, BagScreen, BagEmptyScreen, BagContent, CreateAccountMobileNumber, CreateAccountEmail, CreateAccountEmailSuccessModal, CreateAccountMobileNumberVerification, CreateAccountMobileNumberAccountCreatedConfirmationModal, LoginAccountMobileNumber, LoginAccountEmail, ForgotLoginPassword, ForgotLoginPasswordVerificationCode, ForgotLoginPasswordCreateNewPassword, ForgotLoginPasswordConfirmationModal, LoginAccountMobileNumberVerificationCode, LoginAccountEmailVerificationCode, TermsAndConditions, PreferenceSelector, OrdersScreen, EditProfile, SettingsScreen, DeliveryAddressesSettings, CommunicationPreferences, LinkedAccountScreen, DeleteAccount, DeleteAccountConfirmation, ProfileVisibilityScreen, ContactUsScreen, InvoiceScreen, InvoiceDetails, LoveUsRateUs, FAQScreen, ProductViewOne, ProductViewTwo, ProductViewThree, ProductDetailsMain, TryOnProTips, TryOnUploadPhotoFromGallery, TryUploadFromGalleryUploadModal, ProductDetailsMainReview, ProductDetailsReviewThreePointSelection, ProductDetailsWrittenUserReview, DeliveryOptionsStepOneScreen, Language, Region, MembersExclusive, PointsHistory, InviteAFriend, OrdersReturnExchange, OrdersExchangeSizeSelectionChart, OrdersCancelOrderModal, OrdersReturnRequest, OrdersReturnAcceptedModal, Inbox, OrderConfirmationPhone, DeliveryOptionsStepFourIfCustomRequired } from '../screens';
 
 // Placeholder content components for each tab
 const HomeContent = ({ navigation }) => <HomeScreen navigation={navigation} />;
@@ -191,6 +191,12 @@ const EnhancedLayout = () => {
         return <ProductViewThree navigation={navigation} />;
       case 'ProductDetailsMain':
         return <ProductDetailsMain navigation={navigation} route={{ params: routeParams }} />;
+      case 'TryOnProTips':
+        return <TryOnProTips navigation={navigation} route={{ params: routeParams }} />;
+      case 'TryOnUploadPhotoFromGallery':
+        return <TryOnUploadPhotoFromGallery navigation={navigation} route={{ params: routeParams }} />;
+      case 'TryUploadFromGalleryUploadModal':
+        return <TryUploadFromGalleryUploadModal navigation={navigation} route={{ params: routeParams }} />;
       case 'ProductDetailsMainReview':
         return <ProductDetailsMainReview navigation={navigation} route={{ params: routeParams }} />;
       case 'ProductDetailsReviewThreePointSelection':
