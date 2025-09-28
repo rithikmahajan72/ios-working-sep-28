@@ -48,6 +48,11 @@ yarn-error.log
 # fastlane
 #
 # It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
+
+# iOS builds
+ios/ios-builds/
+*.app.dSYM/
+*.dSYM.zip
 # screenshots whenever they are needed.
 # For more information about the recommended setup visit:
 # https://docs.fastlane.tools/best-practices/source-control/
