@@ -120,6 +120,8 @@ platform :ios do
       scheme: "YoraaApp",
       configuration: "Release",
       export_method: "app-store",
+      include_symbols: true,
+      include_bitcode: false,
       export_options: {
         method: "app-store",
         teamID: "UX6XB9FMNN",
@@ -127,7 +129,8 @@ platform :ios do
         uploadSymbols: true,
         compileBitcode: false,
         destination: "upload",
-        signingStyle: "automatic"
+        signingStyle: "automatic",
+        stripSwiftSymbols: false
       }
     )
 
@@ -186,5 +189,44 @@ platform :ios do
     )
 
     UI.success("✅ iOS project cleaned successfully!")
+  end
+
+  desc "Build development IPA with automatic signing"
+  lane :development do
+    # Clear derived data
+    clear_derived_data
+
+    # Install CocoaPods dependencies
+    cocoapods(
+      clean_install: true,
+      podfile: "./Podfile"
+    )
+
+    # Increment build number
+    increment_build_number(
+      xcodeproj: "Yoraa.xcodeproj"
+    )
+
+    # Build the app with development signing
+    build_app(
+      workspace: "Yoraa.xcworkspace",
+      scheme: "YoraaApp",
+      configuration: "Release",
+      export_method: "development",
+      export_options: {
+        method: "development",
+        teamID: "UX6XB9FMNN",
+        uploadBitcode: false,
+        uploadSymbols: true,
+        compileBitcode: false,
+        destination: "export",
+        signingStyle: "automatic"
+      },
+      output_directory: "./ios-builds",
+      output_name: "YoraaApp-development.ipa"
+    )
+
+    UI.success("✅ iOS development build completed successfully!")
+    UI.message("📱 IPA file location: ./ios-builds/YoraaApp-development.ipa")
   end
 end

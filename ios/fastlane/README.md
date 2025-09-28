@@ -55,6 +55,14 @@ Build Ad Hoc distribution
 
 Clean build and derived data
 
+### ios development
+
+```sh
+[bundle exec] fastlane ios development
+```
+
+Build development IPA with automatic signing
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.
